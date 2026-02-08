@@ -47,7 +47,7 @@ export default function Sidebar() {
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} xl:translate-x-0`}
             >
                 {/* Header */}
-                <div className="p-4 border-b border-[rgb(var(--border))]">
+                <div className="p-4 ">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">

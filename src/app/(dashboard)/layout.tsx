@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="transition-all duration-300 ease-in-out xl:ml-64">
                 <Header />
 
-                <main className="p-4 sm:p-6 lg:p-8">
+                <main className="h-[calc(100vh-64px)] overflow-y-auto hide-scrollbar p-4 sm:p-6 lg:p-8">
                     <div className="max-w-full">{children}</div>
                 </main>
             </div>

@@ -28,7 +28,7 @@ export default function Header() {
     };
 
     return (
-        <header className="h-16 flex items-center justify-between px-6 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] text-[rgb(var(--foreground))]">
+        <header className="sticky top-0 z-50 h-16 flex items-center justify-between px-6 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] text-[rgb(var(--foreground))]">
             {/* Left: Hamburger + Title */}
             <div className="flex items-center gap-4">
                 <button
