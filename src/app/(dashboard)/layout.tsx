@@ -1,12 +1,44 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/SideBar";
 import { useUIStore } from "@/store/sidebar.store";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
     const { sidebarOpen, setSidebarOpen } = useUIStore();
+    const { isAuthenticated, user } = useAuthStore();
+    const [isChecking, setIsChecking] = useState(true);
+
+    useEffect(() => {
+        // Wait for store to hydrate from localStorage
+        const timer = setTimeout(() => {
+            setIsChecking(false);
+
+            // Check if user is authenticated
+            if (!isAuthenticated || !user) {
+                console.log("🔒 Not authenticated, redirecting to sign-in...");
+                router.push("/sign-in");
+            }
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [isAuthenticated, user, router]);
+
+    // Show loading while checking authentication
+    if (isChecking || !isAuthenticated || !user) {
+        return (
+            <div className="min-h-screen bg-[rgb(var(--background))] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto"></div>
+                    <p className="mt-4 text-[rgb(var(--text-muted))]">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[rgb(var(--background))]">

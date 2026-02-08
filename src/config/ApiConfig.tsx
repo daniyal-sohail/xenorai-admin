@@ -12,7 +12,18 @@ const API: AxiosInstance = axios.create({
 // Request interceptor
 API.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-        const token = localStorage.getItem("accessToken");
+        // Get token from auth-storage in localStorage
+        const authStorage = localStorage.getItem("auth-storage");
+        let token = null;
+
+        if (authStorage) {
+            try {
+                const parsedAuth = JSON.parse(authStorage);
+                token = parsedAuth.state?.accessToken;
+            } catch (error) {
+                console.error("Failed to parse auth storage:", error);
+            }
+        }
 
         // Ensure headers exist and assign Authorization safely
         if (token) {

@@ -20,11 +20,11 @@ export default function Header() {
     useClickOutside(userRef, () => setShowUserMenu(false));
 
     const getUserInitials = () => {
-        if (!user) return "";
-        const parts = user.name.split(" ");
+        if (!user || !user.fullName) return "";
+        const parts = user.fullName.split(" ");
         return parts.length > 1
             ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-            : user.name.slice(0, 2).toUpperCase();
+            : user.fullName.slice(0, 2).toUpperCase();
     };
 
     return (
@@ -83,19 +83,19 @@ export default function Header() {
                         </div>
 
                         <div className="hidden sm:block text-left">
-                            <p className="text-sm font-medium max-w-[120px] truncate">{user?.name}</p>
+                            <p className="text-sm font-medium max-w-[120px] truncate">{user?.fullName}</p>
                             <p className="text-xs text-[rgb(var(--text-muted))] max-w-[120px] truncate">{user?.email}</p>
                         </div>
 
                         <div className="sm:hidden">
-                            <p className="text-sm font-medium">{user?.name.split(" ")[0]}</p>
+                            <p className="text-sm font-medium">{user?.fullName?.split(" ")[0]}</p>
                         </div>
                     </div>
 
                     {showUserMenu && (
                         <div className="absolute right-0 mt-2 w-48 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] shadow-lg rounded-lg py-1 z-50">
                             <div className="sm:hidden px-3 py-2 border-b border-[rgb(var(--border))]">
-                                <p className="text-sm font-medium">{user?.name}</p>
+                                <p className="text-sm font-medium">{user?.fullName}</p>
                                 <p className="text-xs text-[rgb(var(--text-muted))] truncate">{user?.email}</p>
                             </div>
 
