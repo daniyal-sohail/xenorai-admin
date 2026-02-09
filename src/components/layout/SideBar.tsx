@@ -21,13 +21,14 @@ type NavItem = { path: string; label: string; icon: LucideIcon };
 
 export const navItems: NavItem[] = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },       // Overview
-    { path: "/dashboard/domains", label: "Domains", icon: Globe },           // Domain management
-    { path: "/dashboard/conversations", label: "Conversations", icon: MessageCircle }, // Chats
-    { path: "/dashboard/leads", label: "Leads", icon: Users },               // Leads
-    { path: "/dashboard/bot-settings", label: "Bot Settings", icon: Cpu },   // Bot config
-    { path: "/dashboard/support", label: "Support", icon: LifeBuoy },        // Help/support
-    { path: "/dashboard/account", label: "Account", icon: Settings },        // Account/profile
-    { path: "/dashboard/plans", label: "Plans", icon: FileText },            // Plan info / limits
+    { path: "/domains", label: "Domains", icon: Globe },           // Domain management
+    { path: "/conversations", label: "Conversations", icon: MessageCircle }, // Chats
+    { path: "/leads", label: "Leads", icon: Users },               // Leads
+    { path: "/products", label: "Products", icon: Users },               // Leads
+    { path: "/bot-settings", label: "Bot Settings", icon: Cpu },   // Bot config
+    { path: "/support", label: "Support", icon: LifeBuoy },        // Help/support
+    { path: "/account", label: "Account", icon: Settings },        // Account/profile
+    { path: "/plans", label: "Plans", icon: FileText },            // Plan info / limits
 ];
 
 export default function Sidebar() {
