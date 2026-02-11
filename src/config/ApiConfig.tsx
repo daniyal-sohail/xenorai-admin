@@ -9,27 +9,11 @@ const API: AxiosInstance = axios.create({
     },
 });
 
-// Request interceptor
+// Request interceptor - httpOnly cookies are automatically included via withCredentials
 API.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-        // Get token from auth-storage in localStorage
-        const authStorage = localStorage.getItem("auth-storage");
-        let token = null;
-
-        if (authStorage) {
-            try {
-                const parsedAuth = JSON.parse(authStorage);
-                token = parsedAuth.state?.accessToken;
-            } catch (error) {
-                console.error("Failed to parse auth storage:", error);
-            }
-        }
-
-        // Ensure headers exist and assign Authorization safely
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-
+        // httpOnly cookies are automatically sent by browser when withCredentials: true
+        // No need to manually add Authorization header
         return config;
     },
     (error: AxiosError) => Promise.reject(error)
@@ -45,8 +29,13 @@ API.interceptors.response.use(
         if (status === 401 || status === 403) {
             console.error("🔒 Authentication failed - Token expired or invalid");
 
-            // Clear auth storage
-            localStorage.removeItem("auth-storage");
+            // Clear auth via Zustand store
+            try {
+                const { useAuthStore } = require("../store/auth.store");
+                useAuthStore.getState().clearAuth();
+            } catch (e) {
+                console.error("Failed to clear auth store:", e);
+            }
 
             // Only redirect if we're not already on an auth page
             if (typeof window !== 'undefined' &&

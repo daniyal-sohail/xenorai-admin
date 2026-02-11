@@ -12,21 +12,18 @@ interface RegisterPayload {
 
 interface AuthState {
     user: IUser | null;
-    accessToken: string;
-    refreshToken: string;
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
 
     // Actions
     setUser: (user: IUser) => void;
-    setTokens: (accessToken: string, refreshToken: string) => void;
     clearAuth: () => void;
 
     register: (payload: RegisterPayload) => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
+    googleLogin: (code: string) => Promise<void>;
     logout: () => Promise<void>;
-    refreshAccessToken: () => Promise<void>;
     updatePassword: (data: {
         currentPassword: string;
         newPassword: string;
@@ -42,20 +39,14 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
             user: null,
-            accessToken: "",
-            refreshToken: "",
             loading: false,
             error: null,
             isAuthenticated: false,
 
             setUser: (user) => set({ user, isAuthenticated: !!user }),
-            setTokens: (accessToken, refreshToken) =>
-                set({ accessToken, refreshToken, isAuthenticated: !!accessToken }),
             clearAuth: () =>
                 set({
                     user: null,
-                    accessToken: "",
-                    refreshToken: "",
                     isAuthenticated: false,
                     error: null,
                 }),
@@ -66,8 +57,6 @@ export const useAuthStore = create<AuthState>()(
                     const data: IAuthResponse = await AuthApi.register(payload);
                     set({
                         user: data.user,
-                        accessToken: data.accessToken,
-                        refreshToken: data.refreshToken,
                         isAuthenticated: true,
                     });
                 } catch (err) {
@@ -86,13 +75,29 @@ export const useAuthStore = create<AuthState>()(
                     const data: IAuthResponse = await AuthApi.login(email, password);
                     set({
                         user: data.user,
-                        accessToken: data.accessToken,
-                        refreshToken: data.refreshToken,
                         isAuthenticated: true,
                     });
                 } catch (err) {
                     const errorMessage =
                         err instanceof Error ? err.message : "Login failed";
+                    set({ error: errorMessage });
+                    throw err;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            googleLogin: async (code: string) => {
+                try {
+                    set({ loading: true, error: null });
+                    const data: IAuthResponse = await AuthApi.googleLogin(code);
+                    set({
+                        user: data.user,
+                        isAuthenticated: true,
+                    });
+                } catch (err) {
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Google login failed";
                     set({ error: errorMessage });
                     throw err;
                 } finally {
@@ -115,17 +120,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            refreshAccessToken: async () => {
-                try {
-                    const { accessToken } = await AuthApi.refreshToken();
-                    set({ accessToken, isAuthenticated: true });
-                } catch (err) {
-                    const errorMessage =
-                        err instanceof Error ? err.message : "Failed to refresh token";
-                    set({ error: errorMessage, isAuthenticated: false });
-                    // Don't throw, just clear auth on token refresh failure
-                }
-            },
+
 
             updatePassword: async (data) => {
                 try {
@@ -159,10 +154,13 @@ export const useAuthStore = create<AuthState>()(
             name: "auth-storage",
             partialize: (state) => ({
                 user: state.user,
-                accessToken: state.accessToken,
-                refreshToken: state.refreshToken,
-                isAuthenticated: state.isAuthenticated,
             }),
+            onRehydrateStorage: () => (state) => {
+                // After rehydration, ensure isAuthenticated matches user state
+                if (state) {
+                    state.isAuthenticated = !!state.user;
+                }
+            },
         }
     )
 );
