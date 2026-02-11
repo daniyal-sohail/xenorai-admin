@@ -48,7 +48,7 @@ export default function Sidebar() {
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} xl:translate-x-0`}
             >
                 {/* Header */}
-                <div className="p-4 ">
+                <div className="px-4 py-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">
@@ -77,7 +77,7 @@ export default function Sidebar() {
                                 <button
                                     key={path}
                                     onClick={() => handleLinkClick(path)}
-                                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg transition-colors text-left relative
+                                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-colors text-left relative
                     ${isActive
                                             ? "bg-[rgb(var(--primary-light-3))] text-[rgb(var(--primary))] border border-[rgb(var(--border))]"
                                             : "text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-muted))] hover:text-[rgb(var(--foreground))]"
@@ -93,7 +93,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[rgb(var(--border))] bg-[rgb(var(--surface))]">
+                <div className="absolute bottom-0 left-0 right-0 p-4 py-2 border-t border-[rgb(var(--border))] bg-[rgb(var(--surface))]">
                     <div className="text-xs text-[rgb(var(--text-muted))] text-center">Developed By DevXcript</div>
                 </div>
             </aside>

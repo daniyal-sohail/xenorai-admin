@@ -1,24 +1,19 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-
-import { RefreshCw } from "lucide-react";
+import { Users, TrendingUp, Phone, UserCheck } from "lucide-react";
 import { useLeadStore } from "@/store/leads.store";
 import { useDomainStore } from "@/store/domain.store";
 import { ILead } from "@/api/LeadsApi";
 import { Popup, PopupType } from "@/components/common/PopUp";
 import { useLeadFilters } from "@/components/leadsComponents/UseLeadFilters";
 import { LeadFormData } from "@/components/leadsComponents/LeadsTypes";
-import { DomainSelector } from "@/components/leadsComponents/DomainSelector";
-import { LeadStatsCard } from "@/components/leadsComponents/LeadStatsCard";
 import { LeadFilters } from "@/components/leadsComponents/LeadFilters";
-import { LeadSkeletonGrid } from "@/components/leadsComponents/LeadSkeleton";
 import { LeadEmptyState } from "@/components/leadsComponents/LeadEmptyState";
-import { LeadCard } from "@/components/leadsComponents/LeadCard";
-import { Pagination } from "@/components/DomainCompoenets/Pagination";
 import { EditLeadModal } from "@/components/leadsComponents/EditLeadModel";
 import { DeleteConfirmModal } from "@/components/DomainCompoenets/DomainConfirmModal";
 import { ExportLeadsButton } from "@/components/leadsComponents/ExportLeadButton";
+import { LeadTable } from "@/components/leadsComponents/LeadTable";
 
 export default function LeadsPage() {
     const {
@@ -57,7 +52,7 @@ export default function LeadsPage() {
         useLeadFilters(leads);
 
     // Pagination
-    const itemsPerPage = 9;
+    const itemsPerPage = 10;
     const paginatedLeads = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -65,6 +60,42 @@ export default function LeadsPage() {
     }, [filteredLeads, currentPage, itemsPerPage]);
 
     const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+
+    // Stats calculations
+    const stats = useMemo(() => {
+        const leadsWithPhone = leads.filter((l) => l.phone).length;
+        const leadsWithName = leads.filter((l) => l.name).length;
+        const leadsWithProducts = leads.filter(
+            (l) => l.productsInterested && l.productsInterested.length > 0
+        ).length;
+
+        return [
+            {
+                label: "Total Leads",
+                value: pagination?.total || 0,
+                icon: Users,
+                gradient: "from-orange-500 to-red-500",
+            },
+            {
+                label: "With Contact",
+                value: leadsWithPhone,
+                icon: Phone,
+                gradient: "from-emerald-500 to-teal-500",
+            },
+            {
+                label: "Identified",
+                value: leadsWithName,
+                icon: UserCheck,
+                gradient: "from-purple-500 to-pink-500",
+            },
+            {
+                label: "Product Interest",
+                value: leadsWithProducts,
+                icon: TrendingUp,
+                gradient: "from-blue-500 to-indigo-500",
+            },
+        ];
+    }, [leads, pagination]);
 
     // Fetch domains on mount
     useEffect(() => {
@@ -142,13 +173,6 @@ export default function LeadsPage() {
         setDeleteModalOpen(true);
     }, []);
 
-    const handleRefresh = useCallback(() => {
-        if (selectedDomainId) {
-            fetchLeads({ domainId: selectedDomainId, page: 1, limit: 100 });
-            showToast("success", "Leads refreshed!");
-        }
-    }, [selectedDomainId, fetchLeads, showToast]);
-
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -157,67 +181,35 @@ export default function LeadsPage() {
     const selectedDomain = domains.find((d) => d._id === selectedDomainId);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                Lead Management
-                            </h1>
-                            <p className="text-gray-600 mt-1">
-                                View and manage leads collected from your chatbot
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleRefresh}
-                                disabled={loading || !selectedDomainId}
-                                className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                            >
-                                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                                Refresh
-                            </button>
-                            <ExportLeadsButton
-                                leads={filteredLeads}
-                                domainName={selectedDomain?.domainName}
-                            />
-                        </div>
+        <div className="" style={{ background: "rgb(var(--background))" }}>
+            <div className="text-black mb-6">
+                <div className="max-w-7xl flex items-center justify-between mx-auto">
+                    <div>
+                        <h1 className="text-3xl font-bold mb-2">Lead Management</h1>
+                        <p className="text-gray-700">
+                            Track and manage leads collected from your chatbot
+                        </p>
                     </div>
+                    <ExportLeadsButton
+                        leads={filteredLeads}
+                        domainName={selectedDomain?.domainName}
+                    />
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Domain Selector */}
-                <DomainSelector
+            <div className="max-w-7xl mx-auto">
+                {/* Unified Filters Bar */}
+                <LeadFilters
                     domains={domains}
                     selectedDomainId={selectedDomainId}
                     onDomainChange={handleDomainChange}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
                 />
 
                 {selectedDomainId && (
                     <>
-                        {/* Stats */}
-                        {!loading && leads.length > 0 && (
-                            <LeadStatsCard
-                                leads={leads}
-                                totalLeads={pagination?.total || 0}
-                            />
-                        )}
-
-                        {/* Filters */}
-                        {!loading && leads.length > 0 && (
-                            <LeadFilters
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                            />
-                        )}
-
-                        {/* Loading State */}
-                        {loading && <LeadSkeletonGrid count={9} />}
-
                         {/* Empty State */}
                         {!loading && leads.length === 0 && (
                             <LeadEmptyState
@@ -236,31 +228,20 @@ export default function LeadsPage() {
                                 />
                             )}
 
-                        {/* Leads Grid */}
-                        {!loading && paginatedLeads.length > 0 && (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                    {paginatedLeads.map((lead) => (
-                                        <LeadCard
-                                            key={lead._id}
-                                            lead={lead}
-                                            onEdit={handleEdit}
-                                            onDelete={handleDelete}
-                                        />
-                                    ))}
-                                </div>
-
-                                {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <Pagination
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        onPageChange={handlePageChange}
-                                        totalItems={filteredLeads.length}
-                                        itemsPerPage={itemsPerPage}
-                                    />
-                                )}
-                            </>
+                        {/* Leads Table */}
+                        {paginatedLeads.length > 0 && (
+                            <LeadTable
+                                leads={paginatedLeads}
+                                loading={loading}
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                itemsPerPage={itemsPerPage}
+                                totalItems={filteredLeads.length}
+                                domains={domains}
+                                onPageChange={handlePageChange}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
                         )}
                     </>
                 )}

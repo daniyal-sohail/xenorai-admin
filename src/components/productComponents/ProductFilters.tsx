@@ -1,19 +1,27 @@
 "use client";
 
 import { FC, memo, useCallback } from "react";
-import { Search, Filter, X, DollarSign } from "lucide-react";
+import { Search, Globe, TrendingUp, Package, CheckCircle, XCircle, DollarSign } from "lucide-react";
 import { ProductFilters as IFilters } from "./ProductTypes";
+import { IDomain } from "@/api/DomainApi";
+import { IProduct } from "./ProductTypes";
 
 interface ProductFiltersProps {
+    domains: IDomain[];
+    selectedDomainId: string | null;
+    onDomainChange: (domainId: string) => void;
     filters: IFilters;
     onFilterChange: (filters: IFilters) => void;
-    categories: string[];
+    products: IProduct[];
 }
 
 const ProductFiltersComponent: FC<ProductFiltersProps> = ({
+    domains,
+    selectedDomainId,
+    onDomainChange,
     filters,
     onFilterChange,
-    categories,
+    products,
 }) => {
     const handleSearchChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,172 +30,153 @@ const ProductFiltersComponent: FC<ProductFiltersProps> = ({
         [filters, onFilterChange]
     );
 
-    const handleCategoryChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            onFilterChange({
-                ...filters,
-                category: e.target.value || undefined,
-            });
-        },
-        [filters, onFilterChange]
-    );
+    // Calculate stats
+    const totalProducts = products.length;
+    const activeProducts = products.filter((p) => p.isActive).length;
+    const inactiveProducts = totalProducts - activeProducts;
+    const averagePrice =
+        totalProducts > 0
+            ? products.reduce((sum, p) => sum + p.price, 0) / totalProducts
+            : 0;
 
-    const handleStatusChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            const value = e.target.value;
-            onFilterChange({
-                ...filters,
-                isActive: value === "" ? undefined : value === "true",
-            });
-        },
-        [filters, onFilterChange]
-    );
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(price);
+    };
 
-    const handlePriceMinChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const value = e.target.value;
-            onFilterChange({
-                ...filters,
-                priceMin: value ? parseFloat(value) : undefined,
-            });
-        },
-        [filters, onFilterChange]
-    );
-
-    const handlePriceMaxChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const value = e.target.value;
-            onFilterChange({
-                ...filters,
-                priceMax: value ? parseFloat(value) : undefined,
-            });
-        },
-        [filters, onFilterChange]
-    );
-
-    const handleClearFilters = useCallback(() => {
-        onFilterChange({});
-    }, [onFilterChange]);
-
-    const hasActiveFilters = !!(
-        filters.search ||
-        filters.category ||
-        filters.isActive !== undefined ||
-        filters.priceMin !== undefined ||
-        filters.priceMax !== undefined
-    );
+    if (domains.length === 0) {
+        return (
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-2xl p-6 mb-6">
+                <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Globe className="text-white" size={24} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            No Domains Found
+                        </h3>
+                        <p className="text-gray-700">
+                            You need to create a domain first to start managing products.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-sm">
-            <div className="flex flex-col gap-4">
-                {/* Row 1: Search */}
-                <div className="relative flex-1">
-                    <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search products by name or description..."
-                        value={filters.search || ""}
-                        onChange={handleSearchChange}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                </div>
-
-                {/* Row 2: Filters */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {/* Category Filter */}
-                    <div className="relative">
+        <div className="space-y-6 mb-8">
+            {/* Search & Domain Bar */}
+            <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg p-5">
+                <div className="flex flex-col lg:flex-row gap-4">
+                    {/* Domain Selector */}
+                    <div className="relative flex-shrink-0 lg:w-72">
+                        <Globe
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500 z-10"
+                            size={20}
+                        />
                         <select
-                            value={filters.category || ""}
-                            onChange={handleCategoryChange}
-                            className="appearance-none w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer text-sm"
+                            value={selectedDomainId || ""}
+                            onChange={(e) => onDomainChange(e.target.value)}
+                            className="appearance-none w-full pl-12 pr-12 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 bg-white cursor-pointer transition-all text-sm font-semibold"
                         >
-                            <option value="">All Categories</option>
-                            {categories.map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat}
+                            <option value="">Select Domain</option>
+                            {domains.map((domain) => (
+                                <option key={domain._id} value={domain._id}>
+                                    {domain.domainName}
                                 </option>
                             ))}
                         </select>
-                        <Filter
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={16}
-                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg
+                                className="w-5 h-5 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
                     </div>
 
-                    {/* Status Filter */}
-                    <div className="relative">
-                        <select
-                            value={
-                                filters.isActive === undefined
-                                    ? ""
-                                    : filters.isActive
-                                        ? "true"
-                                        : "false"
-                            }
-                            onChange={handleStatusChange}
-                            className="appearance-none w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer text-sm"
-                        >
-                            <option value="">All Status</option>
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                        </select>
-                        <Filter
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={16}
-                        />
-                    </div>
-
-                    {/* Min Price */}
-                    <div className="relative">
-                        <DollarSign
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={16}
+                    {/* Search Bar */}
+                    <div className="relative flex-1">
+                        <Search
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                            size={20}
                         />
                         <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="Min Price"
-                            value={filters.priceMin || ""}
-                            onChange={handlePriceMinChange}
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                        />
-                    </div>
-
-                    {/* Max Price */}
-                    <div className="relative">
-                        <DollarSign
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={16}
-                        />
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="Max Price"
-                            value={filters.priceMax || ""}
-                            onChange={handlePriceMaxChange}
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                            type="text"
+                            placeholder="Search products by name or description..."
+                            value={filters.search || ""}
+                            onChange={handleSearchChange}
+                            className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all text-sm"
                         />
                     </div>
                 </div>
-
-                {/* Clear Filters */}
-                {hasActiveFilters && (
-                    <div className="flex justify-end">
-                        <button
-                            onClick={handleClearFilters}
-                            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 text-sm"
-                        >
-                            <X size={16} />
-                            Clear Filters
-                        </button>
-                    </div>
-                )}
             </div>
+
+            {/* Stats Cards */}
+            {selectedDomainId && products.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Total Products */}
+                    <div className="group bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <Package size={24} />
+                            </div>
+                            <TrendingUp className="opacity-50" size={20} />
+                        </div>
+                        <p className="text-white/80 text-sm font-medium mb-1">Total Products</p>
+                        <p className="text-4xl font-bold">{totalProducts}</p>
+                    </div>
+
+                    {/* Active Products */}
+                    <div className="group bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <CheckCircle size={24} />
+                            </div>
+                            <TrendingUp className="opacity-50" size={20} />
+                        </div>
+                        <p className="text-white/80 text-sm font-medium mb-1">Active</p>
+                        <p className="text-4xl font-bold">{activeProducts}</p>
+                    </div>
+
+                    {/* Inactive Products */}
+                    <div className="group bg-gradient-to-br from-gray-500 to-slate-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <XCircle size={24} />
+                            </div>
+                            <TrendingUp className="opacity-50 rotate-180" size={20} />
+                        </div>
+                        <p className="text-white/80 text-sm font-medium mb-1">Inactive</p>
+                        <p className="text-4xl font-bold">{inactiveProducts}</p>
+                    </div>
+
+                    {/* Average Price */}
+                    <div className="group bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <DollarSign size={24} />
+                            </div>
+                            <TrendingUp className="opacity-50" size={20} />
+                        </div>
+                        <p className="text-white/80 text-sm font-medium mb-1">Avg Price</p>
+                        <p className="text-4xl font-bold">{formatPrice(averagePrice)}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

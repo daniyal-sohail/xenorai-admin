@@ -2,6 +2,7 @@
 'use client';
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "@/store/auth.store";
 import { Popup, PopupType } from "../common/PopUp";
@@ -15,7 +16,7 @@ interface SignUpFormValues {
 }
 
 export default function SignUpForm() {
-
+    const router = useRouter();
     const registerUser = useAuthStore((state) => state.register);
     const loading = useAuthStore((state) => state.loading);
 
@@ -49,8 +50,13 @@ export default function SignUpForm() {
             setPopup({
                 open: true,
                 type: "success",
-                message: "Account created successfully!",
+                message: "Account created successfully! Redirecting to login...",
             });
+
+            // Redirect to sign-in page after 2 seconds
+            setTimeout(() => {
+                router.push("/sign-in");
+            }, 2000);
         } catch (err) {
             console.error("❌ Registration error:", err);
             setPopup({

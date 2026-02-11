@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { MessageSquare, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { useConversationStore } from "@/store/conversations.store";
 import { useDomainStore } from "@/store/domain.store";
+import { useAuthStore } from "@/store/auth.store";
 import { IConversation, IMessage } from "@/api/ConversationsApi";
 import { useConversationFilters } from "@/components/conversationComponents/useConversationsFilters";
 import { useSocket } from "@/components/conversationComponents/useSocket";
@@ -14,10 +15,6 @@ import { ConversationListItem } from "@/components/conversationComponents/Conver
 import { ChatWindow } from "@/components/conversationComponents/ChatWindow";
 import { Popup, PopupType } from "@/components/common/PopUp";
 import { DomainSelector } from "@/components/leadsComponents/DomainSelector";
-
-
-// Mock user ID - replace with actual auth
-const MOCK_USER_ID = "user_123";
 
 export default function ConversationsPage() {
     const {
@@ -33,6 +30,7 @@ export default function ConversationsPage() {
     } = useConversationStore();
 
     const { domains, fetchDomains } = useDomainStore();
+    const { user } = useAuthStore();
 
     // Local state
     const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
@@ -57,7 +55,7 @@ export default function ConversationsPage() {
 
     // Socket.IO real-time connection
     const { sendMessage, toggleAI, closeConversation: socketCloseConversation, isConnected } = useSocket({
-        userId: MOCK_USER_ID,
+        userId: user?.id || "",
         domainId: selectedDomainId || undefined,
         onNewMessage: useCallback((message: IMessage) => {
             setMessages((prev) => [...prev, message]);

@@ -39,6 +39,23 @@ API.interceptors.request.use(
 API.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {
+        const status = error.response?.status;
+
+        // Handle authentication errors
+        if (status === 401 || status === 403) {
+            console.error("🔒 Authentication failed - Token expired or invalid");
+
+            // Clear auth storage
+            localStorage.removeItem("auth-storage");
+
+            // Only redirect if we're not already on an auth page
+            if (typeof window !== 'undefined' &&
+                !window.location.pathname.includes('/sign-in') &&
+                !window.location.pathname.includes('/sign-up')) {
+                window.location.href = '/sign-in';
+            }
+        }
+
         console.error("API Error:", error.response?.data || error.message);
         return Promise.reject(error);
     }

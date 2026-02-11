@@ -84,8 +84,8 @@ const PaginationComponent: FC<PaginationProps> = ({
                                 key={page}
                                 onClick={() => onPageChange(page as number)}
                                 className={`min-w-[36px] px-3 py-1.5 rounded-lg font-medium transition-colors ${currentPage === page
-                                        ? "bg-indigo-600 text-white"
-                                        : "hover:bg-gray-100 text-gray-700"
+                                    ? "bg-indigo-600 text-white"
+                                    : "hover:bg-gray-100 text-gray-700"
                                     }`}
                             >
                                 {page}

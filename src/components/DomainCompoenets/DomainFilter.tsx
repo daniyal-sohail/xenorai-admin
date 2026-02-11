@@ -1,149 +1,86 @@
 "use client";
 
 import { FC, memo, useCallback } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { DomainFilters as IFilters } from "./DomainTypes";
-
 
 interface DomainFiltersProps {
     filters: IFilters;
     onFilterChange: (filters: IFilters) => void;
 }
 
-const DomainFiltersComponent: FC<DomainFiltersProps> = ({
-    filters,
-    onFilterChange,
-}) => {
-    const handleSearchChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            onFilterChange({ ...filters, search: e.target.value });
-        },
+const DomainFiltersComponent: FC<DomainFiltersProps> = ({ filters, onFilterChange }) => {
+    const handleSearch = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) =>
+            onFilterChange({ ...filters, search: e.target.value }),
         [filters, onFilterChange]
     );
 
-    const handleToneChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            onFilterChange({
-                ...filters,
-                tone: e.target.value ? (e.target.value as any) : undefined,
-            });
-        },
+    const clearSearch = useCallback(
+        () => onFilterChange({ ...filters, search: "" }),
         [filters, onFilterChange]
     );
 
-    const handleIndustryChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            onFilterChange({
-                ...filters,
-                industry: e.target.value ? (e.target.value as any) : undefined,
-            });
-        },
+    const setStatus = useCallback(
+        (status: "enabled" | "disabled" | undefined) =>
+            onFilterChange({ ...filters, status }),
         [filters, onFilterChange]
-    );
-
-    const handleStatusChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            onFilterChange({
-                ...filters,
-                status: e.target.value ? (e.target.value as any) : undefined,
-            });
-        },
-        [filters, onFilterChange]
-    );
-
-    const handleClearFilters = useCallback(() => {
-        onFilterChange({});
-    }, [onFilterChange]);
-
-    const hasActiveFilters = !!(
-        filters.search ||
-        filters.tone ||
-        filters.industry ||
-        filters.status
     );
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search */}
-                <div className="flex-1 relative">
-                    <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search domains..."
-                        value={filters.search || ""}
-                        onChange={handleSearchChange}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                </div>
-
-                {/* Tone Filter */}
-                <div className="relative">
-                    <select
-                        value={filters.tone || ""}
-                        onChange={handleToneChange}
-                        className="appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer min-w-[140px]"
-                    >
-                        <option value="">All Tones</option>
-                        <option value="professional">Professional</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="salesy">Salesy</option>
-                    </select>
-                    <Filter
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                        size={16}
-                    />
-                </div>
-
-                {/* Industry Filter */}
-                <div className="relative">
-                    <select
-                        value={filters.industry || ""}
-                        onChange={handleIndustryChange}
-                        className="appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer min-w-[140px]"
-                    >
-                        <option value="">All Industries</option>
-                        <option value="ecommerce">E-commerce</option>
-                        <option value="services">Services</option>
-                        <option value="saas">SaaS</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <Filter
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                        size={16}
-                    />
-                </div>
-
-                {/* Status Filter */}
-                <div className="relative">
-                    <select
-                        value={filters.status || ""}
-                        onChange={handleStatusChange}
-                        className="appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer min-w-[140px]"
-                    >
-                        <option value="">All Status</option>
-                        <option value="enabled">Active</option>
-                        <option value="disabled">Disabled</option>
-                    </select>
-                    <Filter
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                        size={16}
-                    />
-                </div>
-
-                {/* Clear Filters */}
-                {hasActiveFilters && (
+        <div className="flex items-center gap-3 mb-6">
+            {/* Search */}
+            <div className="relative flex-1 max-w-sm">
+                <Search
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--text-muted))] pointer-events-none"
+                />
+                <input
+                    type="text"
+                    placeholder="Search domains or bots…"
+                    value={filters.search || ""}
+                    onChange={handleSearch}
+                    className="w-full pl-10 pr-9 py-2.5 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl text-sm text-[rgb(var(--foreground))] placeholder:text-[rgb(var(--text-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))]/25 focus:border-[rgb(var(--primary))] transition-all"
+                />
+                {filters.search && (
                     <button
-                        onClick={handleClearFilters}
-                        className="px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 whitespace-nowrap"
+                        onClick={clearSearch}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))] transition-colors"
                     >
-                        <X size={16} />
-                        Clear
+                        <X size={14} />
                     </button>
                 )}
+            </div>
+
+            {/* Status toggle pills */}
+            <div className="flex items-center gap-1 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-1">
+                <button
+                    onClick={() => setStatus(undefined)}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${!filters.status
+                            ? "bg-[rgb(var(--foreground))] text-[rgb(var(--surface))] shadow-sm"
+                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
+                        }`}
+                >
+                    All
+                </button>
+                <button
+                    onClick={() => setStatus("enabled")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${filters.status === "enabled"
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
+                        }`}
+                >
+                    Active
+                </button>
+                <button
+                    onClick={() => setStatus("disabled")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${filters.status === "disabled"
+                            ? "bg-[rgb(var(--surface-muted))] text-[rgb(var(--foreground))] shadow-sm border border-[rgb(var(--border))]"
+                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
+                        }`}
+                >
+                    Inactive
+                </button>
             </div>
         </div>
     );

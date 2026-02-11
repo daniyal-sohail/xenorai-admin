@@ -1,202 +1,379 @@
 "use client";
 
-import { useUserStore } from "@/store/user.store";
+import { useState, useEffect, useRef } from "react";
+import { Camera, Lock, User, Mail, Calendar, Shield } from "lucide-react";
+import { Popup, PopupType } from "@/components/common/PopUp";
 import { useAuthStore } from "@/store/auth.store";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Popup } from "../common/PopUp";
+import { useUserStore } from "@/store/user.store";
 
+export default function AccountPage() {
+    const { user: authUser } = useAuthStore();
+    const { user, loading, updateProfile } = useUserStore();
+    const [activeTab, setActiveTab] = useState<"profile" | "security">("profile");
 
-interface AccountFormValues {
-    fullName: string;
-    profileImage?: FileList;
-}
+    // Profile state
+    const [fullName, setFullName] = useState("");
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-function Account() {
-    const { fetchProfile, updateProfile, loading } = useUserStore();
-    const { user, setUser } = useAuthStore();
-    const [popup, setPopup] = useState<{ open: boolean; type?: any; message?: string }>({
+    // Security state
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    // Toast state
+    const [toast, setToast] = useState<{
+        open: boolean;
+        type: PopupType;
+        message: string;
+    }>({
         open: false,
-    });
-    const [preview, setPreview] = useState<string | null>(null);
-
-    const {
-        register,
-        handleSubmit,
-        reset,
-        watch,
-        formState: { errors },
-    } = useForm<AccountFormValues>({
-        defaultValues: {
-            fullName: "",
-        },
+        type: "info",
+        message: "",
     });
 
-    const profileImageFile = watch("profileImage");
+    const isGoogleUser = authUser?.authProvider === "google";
+    const currentUser = user || authUser;
 
     useEffect(() => {
-        // Initialize form with current user data from auth store
-        if (user) {
-            reset({ fullName: user.fullName });
-            setPreview(user.profileImage || null);
+        if (currentUser) {
+            setFullName(currentUser.fullName || "");
+            setPreviewUrl(currentUser.profileImage || null);
         }
-    }, [user, reset]);
+    }, [currentUser]);
 
-    useEffect(() => {
-        if (profileImageFile && profileImageFile.length > 0) {
-            const file = profileImageFile[0];
-            const url = URL.createObjectURL(file);
-            setPreview(url);
-            return () => URL.revokeObjectURL(url);
-        }
-    }, [profileImageFile]);
+    const showToast = (type: PopupType, message: string) => {
+        setToast({ open: true, type, message });
+    };
 
-    const onSubmit = async (data: AccountFormValues) => {
-        try {
-            const updateData: { fullName?: string; profileImg?: File } = {
-                fullName: data.fullName,
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showToast("error", "Image size must be less than 5MB");
+                return;
+            }
+            setProfileImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
             };
-
-            if (data.profileImage && data.profileImage.length > 0) {
-                updateData.profileImg = data.profileImage[0];
-            }
-
-            // Update profile via API
-            await updateProfile(updateData);
-
-            // Fetch updated profile to get the latest data including the new image URL
-            await fetchProfile();
-
-            // Get the updated user from user store and sync with auth store
-            const updatedUser = useUserStore.getState().user;
-            if (updatedUser) {
-                setUser(updatedUser);
-            }
-
-            setPopup({ open: true, type: "success", message: "Profile updated successfully" });
-        } catch (err: any) {
-            setPopup({ open: true, type: "error", message: err.message });
+            reader.readAsDataURL(file);
         }
     };
 
-    return (
-        <div className="max-w-3xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-2">My Profile</h1>
-                <p className="text-[rgb(var(--text-muted))]">Update your profile information</p>
-            </div>
+    const handleProfileUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-            <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-lg p-6 shadow-sm">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Profile Image */}
-                    <div>
-                        <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-3">
-                            Profile Image
-                        </label>
-                        <div className="flex items-center gap-6">
-                            <div className="w-24 h-24 bg-[rgb(var(--surface-muted))] border-2 border-[rgb(var(--border))] rounded-full overflow-hidden flex items-center justify-center">
-                                {preview ? (
-                                    <img src={preview} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    <svg className="w-12 h-12 text-[rgb(var(--text-muted))]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-[rgb(var(--border))] rounded-md text-sm font-medium text-[rgb(var(--foreground))] bg-[rgb(var(--background))] hover:bg-[rgb(var(--surface-muted))] transition-colors">
-                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Choose Image
+        if (!fullName.trim()) {
+            showToast("error", "Full name is required");
+            return;
+        }
+
+        try {
+            await updateProfile({
+                fullName: fullName.trim(),
+                profileImage: profileImage || undefined,
+            });
+            showToast("success", "Profile updated successfully!");
+            setProfileImage(null);
+        } catch (err) {
+            showToast("error", err instanceof Error ? err.message : "Failed to update profile");
+        }
+    };
+
+    const handlePasswordUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!newPassword || !confirmPassword) {
+            showToast("error", "Please fill all password fields");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showToast("error", "Passwords do not match");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showToast("error", "Password must be at least 6 characters");
+            return;
+        }
+
+        try {
+            if (isGoogleUser) {
+                // Set password for Google users
+                await useAuthStore.getState().setPassword({
+                    newPassword,
+                    confirmPassword,
+                });
+                showToast("success", "Password set successfully!");
+            } else {
+                // Update password for local users
+                if (!currentPassword) {
+                    showToast("error", "Current password is required");
+                    return;
+                }
+                await useAuthStore.getState().updatePassword({
+                    currentPassword,
+                    newPassword,
+                    confirmPassword,
+                });
+                showToast("success", "Password updated successfully!");
+            }
+
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        } catch (err) {
+            showToast("error", err instanceof Error ? err.message : "Failed to update password");
+        }
+    };
+
+    if (!currentUser) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-500">Loading...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-50 py-12 px-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+                        Account Settings
+                    </h1>
+                    <p className="text-gray-600">Manage your profile and security settings</p>
+                </div>
+
+                {/* Tab Navigation */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 p-2 flex gap-2">
+                    <button
+                        onClick={() => setActiveTab("profile")}
+                        className={`flex-1 py-3 px-6 rounded-xl font-medium transition-all duration-200 ${activeTab === "profile"
+                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200"
+                            : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                    >
+                        <User className="inline-block mr-2 mb-1" size={18} />
+                        Profile
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("security")}
+                        className={`flex-1 py-3 px-6 rounded-xl font-medium transition-all duration-200 ${activeTab === "security"
+                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200"
+                            : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                    >
+                        <Lock className="inline-block mr-2 mb-1" size={18} />
+                        Security
+                    </button>
+                </div>
+
+                {/* Profile Tab */}
+                {activeTab === "profile" && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                        <form onSubmit={handleProfileUpdate}>
+                            {/* Profile Image */}
+                            <div className="flex flex-col items-center mb-8">
+                                <div className="relative group">
+                                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-4xl font-bold shadow-xl">
+                                        {previewUrl ? (
+                                            <img
+                                                src={previewUrl}
+                                                alt="Profile"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            currentUser.fullName?.charAt(0).toUpperCase()
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all"
+                                    >
+                                        <Camera size={18} />
+                                    </button>
                                     <input
+                                        ref={fileInputRef}
                                         type="file"
                                         accept="image/*"
-                                        {...register("profileImage")}
+                                        onChange={handleImageChange}
                                         className="hidden"
                                     />
-                                </label>
-                                <p className="text-xs text-[rgb(var(--text-muted))] mt-2">
-                                    JPG, PNG or GIF (MAX. 2MB)
+                                </div>
+                                <p className="text-sm text-gray-500 mt-3">
+                                    Click camera to upload new photo
                                 </p>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Full Name */}
-                    <div>
-                        <label htmlFor="fullName" className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                            Full Name
-                        </label>
-                        <input
-                            id="fullName"
-                            {...register("fullName", { required: "Full name is required" })}
-                            className={`w-full px-4 py-2.5 bg-[rgb(var(--background))] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] transition-colors ${errors.fullName
-                                ? "border-red-500 focus:ring-red-500"
-                                : "border-[rgb(var(--border))] hover:border-[rgb(var(--primary))]"
-                                }`}
-                            placeholder="Enter your full name"
-                        />
-                        {errors.fullName && (
-                            <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                                {errors.fullName.message}
-                            </p>
-                        )}
-                    </div>
+                            {/* Account Info Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                            <Mail className="text-white" size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">Email</p>
+                                            <p className="text-sm text-gray-700 font-medium">{currentUser.email}</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {/* Email (Read-only) */}
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                            Email Address
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={user?.email || ""}
-                            disabled
-                            className="w-full px-4 py-2.5 bg-[rgb(var(--surface-muted))] border border-[rgb(var(--border))] rounded-lg text-[rgb(var(--text-muted))] cursor-not-allowed"
-                        />
-                        <p className="text-xs text-[rgb(var(--text-muted))] mt-1.5">
-                            Email cannot be changed
-                        </p>
-                    </div>
+                                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                                            <Shield className="text-white" size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-purple-600 font-medium">Auth Provider</p>
+                                            <p className="text-sm text-gray-700 font-medium capitalize">
+                                                {isGoogleUser ? "Google" : "Local"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    {/* Submit Button */}
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3 px-4 bg-[rgb(var(--primary))] hover:bg-[rgb(var(--primary-hover))] text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Saving Changes...
-                                </span>
-                            ) : (
-                                "Save Changes"
+                            {/* Full Name Input */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Full Name
+                                </label>
+                                <div className="relative">
+                                    <User
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                        size={20}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                                        placeholder="Enter your full name"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Update Button */}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? "Updating..." : "Update Profile"}
+                            </button>
+                        </form>
+                    </div>
+                )}
+
+                {/* Security Tab */}
+                {activeTab === "security" && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                        <form onSubmit={handlePasswordUpdate}>
+                            <div className="mb-6">
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                    {isGoogleUser ? "Set Password" : "Change Password"}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                    {isGoogleUser
+                                        ? "Create a password to enable local login"
+                                        : "Update your account password"}
+                                </p>
+                            </div>
+
+                            {/* Current Password - Only for local users */}
+                            {!isGoogleUser && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Current Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                            size={20}
+                                        />
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                                            placeholder="Enter current password"
+                                        />
+                                    </div>
+                                </div>
                             )}
-                        </button>
+
+                            {/* New Password */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    New Password
+                                </label>
+                                <div className="relative">
+                                    <Lock
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                        size={20}
+                                    />
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                                        placeholder="Enter new password"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Confirm Password */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Confirm New Password
+                                </label>
+                                <div className="relative">
+                                    <Lock
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                        size={20}
+                                    />
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                                        placeholder="Confirm new password"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Update Button */}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading
+                                    ? "Updating..."
+                                    : isGoogleUser
+                                        ? "Set Password"
+                                        : "Update Password"}
+                            </button>
+                        </form>
                     </div>
-                </form>
+                )}
             </div>
 
-            {/* Popup */}
+            {/* Toast Notifications */}
             <Popup
-                open={popup.open}
-                type={popup.type}
-                message={popup.message || ""}
-                onClose={() => setPopup({ open: false })}
-                autoClose={4000}
+                open={toast.open}
+                type={toast.type}
+                message={toast.message}
+                onClose={() => setToast({ ...toast, open: false })}
             />
         </div>
     );
 }
-
-export default Account

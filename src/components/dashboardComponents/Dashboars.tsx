@@ -1,13 +1,14 @@
 // src/pages/Dashboard.tsx
 import { useEffect } from "react";
-
 import {
     MessageSquare,
     Users,
-    TrendingUp,
     Calendar,
     Globe,
     Activity,
+    ArrowUpRight,
+    ArrowDownRight,
+    TrendingUp,
 } from "lucide-react";
 import { useStatsStore } from "@/store/stats.store";
 import { useUserStore } from "@/store/user.store";
@@ -27,34 +28,51 @@ const StatCard = ({ title, value, icon, trend, loading }: StatCardProps) => {
     if (loading) {
         return (
             <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-6 animate-pulse">
-                <div className="h-4 w-24 bg-[rgb(var(--surface-muted))] rounded mb-4" />
-                <div className="h-8 w-32 bg-[rgb(var(--surface-muted))] rounded" />
+                <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                        <div className="h-3 bg-[rgb(var(--surface-muted))] rounded w-24 mb-4"></div>
+                        <div className="h-8 bg-[rgb(var(--surface-muted))] rounded w-28"></div>
+                    </div>
+                    <div className="w-12 h-12 bg-[rgb(var(--surface-muted))] rounded-xl"></div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-6 hover:shadow-lg transition-shadow duration-200">
-            <div className="flex items-start justify-between mb-4">
-                <div className="p-2.5 rounded-lg bg-[rgb(var(--primary-light-3))]">
-                    <div className="text-[rgb(var(--primary))]">{icon}</div>
+        <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-6 hover:shadow-sm transition-all duration-200">
+            <div className="flex items-start justify-between">
+                <div className="flex-1">
+                    <p className="text-sm font-medium text-[rgb(var(--text-muted))] mb-2">
+                        {title}
+                    </p>
+                    <p className="text-3xl font-semibold text-[rgb(var(--foreground))] mb-3">
+                        {typeof value === "number" ? value.toLocaleString() : value}
+                    </p>
+                    {trend && (
+                        <div className="flex items-center gap-1.5">
+                            {trend.isPositive ? (
+                                <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                            ) : (
+                                <ArrowDownRight className="w-4 h-4 text-rose-600" />
+                            )}
+                            <span
+                                className={`text-sm font-semibold ${trend.isPositive ? "text-emerald-600" : "text-rose-600"
+                                    }`}
+                            >
+                                {trend.isPositive ? "+" : ""}
+                                {trend.value}
+                            </span>
+                            <span className="text-sm text-[rgb(var(--text-muted))]">
+                                vs last week
+                            </span>
+                        </div>
+                    )}
                 </div>
-                {trend && (
-                    <span
-                        className={`text-sm font-medium ${trend.isPositive ? "text-green-600" : "text-red-600"
-                            }`}
-                    >
-                        {trend.isPositive ? "+" : ""}
-                        {trend.value}
-                    </span>
-                )}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgb(var(--primary-light-3))] to-[rgb(var(--primary-light-2))] flex items-center justify-center text-[rgb(var(--primary))]">
+                    {icon}
+                </div>
             </div>
-            <h3 className="text-[rgb(var(--text-muted))] text-sm font-medium mb-1">
-                {title}
-            </h3>
-            <p className="text-[rgb(var(--foreground))] text-3xl font-bold">
-                {typeof value === "number" ? value.toLocaleString() : value}
-            </p>
         </div>
     );
 };
@@ -75,37 +93,40 @@ const DomainRow = ({ domain }: DomainRowProps) => {
             : 0;
 
     return (
-        <div className="flex items-center justify-between py-4 border-b border-[rgb(var(--border))] last:border-0 hover:bg-[rgb(var(--surface-muted))] px-4 -mx-4 rounded-lg transition-colors">
-            <div className="flex items-center gap-3 flex-1">
-                <div className="w-10 h-10 rounded-full bg-[rgb(var(--primary-light-3))] flex items-center justify-center">
+        <div className="group flex items-center justify-between py-4 px-5 hover:bg-[rgb(var(--surface-muted))] rounded-lg transition-colors duration-200">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[rgb(var(--primary-light-3))] to-[rgb(var(--primary-light-2))] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
                     <Globe className="w-5 h-5 text-[rgb(var(--primary))]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-[rgb(var(--foreground))] font-medium truncate">
+                    <p className="text-sm font-semibold text-[rgb(var(--foreground))] truncate mb-0.5">
                         {domain.domainName}
                     </p>
-                    <p className="text-[rgb(var(--text-muted))] text-sm">
-                        {domain.conversations} conversations
+                    <p className="text-xs text-[rgb(var(--text-muted))]">
+                        {domain.conversations.toLocaleString()} total conversations
                     </p>
                 </div>
             </div>
             <div className="flex items-center gap-6">
                 <div className="text-right">
-                    <p className="text-[rgb(var(--foreground))] font-semibold">
+                    <p className="text-lg font-bold text-[rgb(var(--foreground))]">
                         {domain.active}
                     </p>
-                    <p className="text-[rgb(var(--text-muted))] text-xs">Active</p>
-                </div>
-                <div className="w-16">
-                    <div className="h-2 bg-[rgb(var(--surface-muted))] rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-[rgb(var(--primary))] rounded-full transition-all duration-300"
-                            style={{ width: `${activePercentage}%` }}
-                        />
-                    </div>
-                    <p className="text-[rgb(var(--text-muted))] text-xs mt-1 text-right">
-                        {activePercentage}%
+                    <p className="text-xs font-medium text-[rgb(var(--text-muted))]">
+                        Active
                     </p>
+                </div>
+                <div className="w-20 text-right">
+                    <span
+                        className={`inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold min-w-[60px] ${activePercentage > 70
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                            : activePercentage > 40
+                                ? "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
+                                : "bg-[rgb(var(--surface-muted))] text-[rgb(var(--text-muted))]"
+                            }`}
+                    >
+                        {activePercentage}%
+                    </span>
                 </div>
             </div>
         </div>
@@ -137,17 +158,27 @@ const Dashboard = () => {
             .slice(0, 2);
     };
 
+    const totalConversations = dashboard?.byDomain?.reduce(
+        (sum, domain) => sum + domain.conversations,
+        0
+    ) ?? 0;
+
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md">
-                    <p className="text-red-800 font-medium">Error loading dashboard</p>
-                    <p className="text-red-600 text-sm mt-1">{error}</p>
+            <div className="min-h-screen bg-[rgb(var(--background))] flex items-center justify-center p-0">
+                <div className="bg-[rgb(var(--surface))] border border-rose-200 rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
+                    <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-5">
+                        <Activity className="w-7 h-7 text-rose-600 dark:text-rose-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-2">
+                        Unable to load dashboard
+                    </h3>
+                    <p className="text-sm text-[rgb(var(--text-muted))] mb-6">{error}</p>
                     <button
                         onClick={() => fetchDashboardStats()}
-                        className="mt-4 px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] transition-colors"
+                        className="btn px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow transition-all duration-200"
                     >
-                        Retry
+                        Try Again
                     </button>
                 </div>
             </div>
@@ -155,43 +186,45 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[rgb(var(--background))] p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen bg-[rgb(var(--background))]">
+            <div className="max-w-7xl mx-auto  ">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-2">
                             {getGreeting()}
                             {user?.fullName && (
-                                <span className="text-[rgb(var(--primary))]">
+                                <span className="text-[rgb(var(--text-muted))]">
                                     , {user.fullName.split(" ")[0]}
                                 </span>
                             )}
                         </h1>
-                        <p className="text-[rgb(var(--text-muted))]">
+                        <p className="text-base text-[rgb(var(--text-muted))]">
                             Here's what's happening with your chatbots today
                         </p>
                     </div>
 
                     {/* User Profile */}
                     {user && (
-                        <div className="flex items-center gap-3 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-3 pr-5">
+                        <div className="flex items-center gap-3 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl px-4 py-3 shadow-sm">
                             {user.profileImage ? (
                                 <img
                                     src={user.profileImage}
                                     alt={user.fullName}
-                                    className="w-12 h-12 rounded-full object-cover"
+                                    className="w-10 h-10 rounded-full object-cover ring-2 ring-[rgb(var(--border))]"
                                 />
                             ) : (
-                                <div className="w-12 h-12 rounded-full bg-[rgb(var(--primary))] flex items-center justify-center text-white font-semibold">
-                                    {getUserInitials(user.fullName)}
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--primary-hover))] flex items-center justify-center shadow-sm">
+                                    <span className="text-sm font-bold text-white">
+                                        {getUserInitials(user.fullName)}
+                                    </span>
                                 </div>
                             )}
-                            <div>
-                                <p className="text-[rgb(var(--foreground))] font-medium">
+                            <div className="hidden sm:block">
+                                <p className="text-sm font-semibold text-[rgb(var(--foreground))]">
                                     {user.fullName}
                                 </p>
-                                <p className="text-[rgb(var(--text-muted))] text-sm">
+                                <p className="text-xs text-[rgb(var(--text-muted))]">
                                     {user.email}
                                 </p>
                             </div>
@@ -200,29 +233,29 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                     <StatCard
                         title="Total Conversations"
-                        value={dashboard?.totalChats ?? 0}
-                        icon={<MessageSquare className="w-5 h-5" />}
-                        loading={loading}
-                    />
-                    <StatCard
-                        title="Total Leads"
-                        value={dashboard?.totalLeads ?? 0}
-                        icon={<Users className="w-5 h-5" />}
+                        value={totalConversations}
+                        icon={<MessageSquare className="w-6 h-6" />}
                         loading={loading}
                     />
                     <StatCard
                         title="Active Conversations"
                         value={dashboard?.activeConversations ?? 0}
-                        icon={<Activity className="w-5 h-5" />}
+                        icon={<Activity className="w-6 h-6" />}
                         loading={loading}
                     />
                     <StatCard
                         title="Today's Chats"
                         value={dashboard?.todaysChats ?? 0}
-                        icon={<Calendar className="w-5 h-5" />}
+                        icon={<Calendar className="w-6 h-6" />}
+                        loading={loading}
+                    />
+                    <StatCard
+                        title="Total Leads"
+                        value={dashboard?.totalLeads ?? 0}
+                        icon={<Users className="w-6 h-6" />}
                         trend={{
                             value: "12%",
                             isPositive: true,
@@ -232,74 +265,90 @@ const Dashboard = () => {
                 </div>
 
                 {/* Domain Performance */}
-                <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-[rgb(var(--foreground))]">
-                                Domain Performance
-                            </h2>
-                            <p className="text-[rgb(var(--text-muted))] text-sm mt-1">
-                                Active conversations by domain
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 text-[rgb(var(--text-muted))]">
-                            <TrendingUp className="w-5 h-5" />
-                            <span className="text-sm font-medium">
-                                {dashboard?.byDomain.length ?? 0} domains
-                            </span>
+                <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl shadow-sm overflow-hidden">
+                    <div className="px-6 py-5 border-b border-[rgb(var(--border))]">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg font-bold text-[rgb(var(--foreground))] mb-1">
+                                    Domain Performance
+                                </h2>
+                                <p className="text-sm text-[rgb(var(--text-muted))]">
+                                    Active conversations across all domains
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-[rgb(var(--surface-muted))] rounded-lg">
+                                <TrendingUp className="w-4 h-4 text-[rgb(var(--primary))]" />
+                                <span className="text-sm font-semibold text-[rgb(var(--foreground))]">
+                                    {dashboard?.byDomain?.length ?? 0}
+                                </span>
+                                <span className="text-xs text-[rgb(var(--text-muted))]">
+                                    domains
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {loading ? (
-                        <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="animate-pulse">
-                                    <div className="h-16 bg-[rgb(var(--surface-muted))] rounded-lg" />
+                    <div className="p-3">
+                        {loading ? (
+                            <div className="space-y-2">
+                                {[1, 2, 3].map((i) => (
+                                    <div
+                                        key={i}
+                                        className="h-20 bg-[rgb(var(--surface-muted))] rounded-lg animate-pulse"
+                                    ></div>
+                                ))}
+                            </div>
+                        ) : dashboard?.byDomain && dashboard.byDomain.length > 0 ? (
+                            <div className="space-y-1">
+                                {dashboard.byDomain.map((domain) => (
+                                    <DomainRow key={domain.domainId} domain={domain} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-16">
+                                <div className="w-16 h-16 rounded-2xl bg-[rgb(var(--surface-muted))] flex items-center justify-center mx-auto mb-4">
+                                    <Globe className="w-8 h-8 text-[rgb(var(--text-muted))]" />
                                 </div>
-                            ))}
-                        </div>
-                    ) : dashboard?.byDomain && dashboard.byDomain.length > 0 ? (
-                        <div className="space-y-1">
-                            {dashboard.byDomain.map((domain) => (
-                                <DomainRow key={domain.domainId} domain={domain} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <Globe className="w-12 h-12 text-[rgb(var(--text-muted))] mx-auto mb-3" />
-                            <p className="text-[rgb(var(--text-muted))]">
-                                No domains configured yet
-                            </p>
-                        </div>
-                    )}
+                                <p className="text-base font-semibold text-[rgb(var(--foreground))] mb-2">
+                                    No domains configured yet
+                                </p>
+                                <p className="text-sm text-[rgb(var(--text-muted))] mb-6">
+                                    Add your first domain to start tracking conversations
+                                </p>
+                                <button className="btn px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow transition-all duration-200">
+                                    Add Domain
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Quick Stats Summary */}
+                {/* Performance Summary */}
                 {dashboard && !loading && (
-                    <div className="bg-gradient-to-br from-[rgb(var(--primary-light-3))] to-[rgb(var(--primary-light-2))] border border-[rgb(var(--primary-light-1))] rounded-xl p-6">
+                    <div className="mt-6 bg-gradient-to-br from-[rgb(var(--primary-light-3))] to-[rgb(var(--primary-light-2))] border border-[rgb(var(--primary-light-2))] rounded-2xl p-6 shadow-sm">
                         <div className="flex items-start gap-4">
-                            <div className="p-3 bg-white rounded-lg">
+                            <div className="w-12 h-12 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0">
                                 <TrendingUp className="w-6 h-6 text-[rgb(var(--primary))]" />
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-[rgb(var(--foreground))] font-semibold text-lg mb-2">
+                            <div>
+                                <h3 className="text-base font-bold text-[rgb(var(--foreground))] mb-2">
                                     Performance Summary
                                 </h3>
-                                <p className="text-[rgb(var(--text-muted))] text-sm leading-relaxed">
+                                <p className="text-sm text-[rgb(var(--foreground))]/80 leading-relaxed">
                                     You have{" "}
-                                    <span className="font-semibold text-[rgb(var(--foreground))]">
+                                    <span className="font-bold text-[rgb(var(--primary))]">
                                         {dashboard.activeConversations} active conversations
                                     </span>{" "}
                                     across{" "}
-                                    <span className="font-semibold text-[rgb(var(--foreground))]">
+                                    <span className="font-bold text-[rgb(var(--primary))]">
                                         {dashboard.byDomain.length} domains
                                     </span>
                                     . Your chatbots handled{" "}
-                                    <span className="font-semibold text-[rgb(var(--foreground))]">
+                                    <span className="font-bold text-[rgb(var(--primary))]">
                                         {dashboard.todaysChats} chats today
                                     </span>{" "}
                                     and generated{" "}
-                                    <span className="font-semibold text-[rgb(var(--foreground))]">
+                                    <span className="font-bold text-[rgb(var(--primary))]">
                                         {dashboard.totalLeads} leads
                                     </span>{" "}
                                     in total.

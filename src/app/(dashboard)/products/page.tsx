@@ -1,24 +1,18 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { useProductStore } from "@/store/product.store";
 import { useDomainStore } from "@/store/domain.store";
 import { IProduct } from "@/api/ProductApi";
 import { Popup, PopupType } from "@/components/common/PopUp";
 import { useProductFilters } from "@/components/productComponents/UseProductFilter";
 import { ProductFormData } from "@/components/productComponents/ProductTypes";
-import { DomainSelector } from "@/components/leadsComponents/DomainSelector";
-import { ProductStatsCard } from "@/components/productComponents/ProductStatsCard";
 import { ProductFilters } from "@/components/productComponents/ProductFilters";
-import { ProductSkeletonGrid } from "@/components/productComponents/ProductSkeleton";
-import { ProductEmptyState } from "@/components/productComponents/ProductEmptyState";
-import { ProductCard } from "@/components/productComponents/ProductCard";
-import { Pagination } from "@/components/DomainCompoenets/Pagination";
 import { CreateProductModal } from "@/components/productComponents/CreateProductModal";
 import { EditProductModal } from "@/components/productComponents/EditProductModal";
 import { DeleteConfirmModal } from "@/components/DomainCompoenets/DomainConfirmModal";
-
+import { ProductTable } from "@/components/productComponents/ProductTable";
 
 export default function ProductsPage() {
     const {
@@ -34,16 +28,13 @@ export default function ProductsPage() {
 
     const { domains, fetchDomains } = useDomainStore();
 
-    // Local state
     const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
 
-    // Toast state
     const [toast, setToast] = useState<{
         open: boolean;
         type: PopupType;
@@ -54,51 +45,25 @@ export default function ProductsPage() {
         message: "",
     });
 
-    // Filters
-    const {
-        filters,
-        filteredProducts,
-        categories,
-        handleFilterChange,
-        hasActiveFilters,
-    } = useProductFilters(products);
+    const { filters, filteredProducts, handleFilterChange } =
+        useProductFilters(products);
 
-    // Pagination
-    const itemsPerPage = 9;
-    const paginatedProducts = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredProducts.slice(startIndex, endIndex);
-    }, [filteredProducts, currentPage, itemsPerPage]);
-
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-    // Fetch domains on mount
     useEffect(() => {
         fetchDomains();
     }, [fetchDomains]);
 
-    // Auto-select first domain if available
     useEffect(() => {
         if (domains.length > 0 && !selectedDomainId) {
             setSelectedDomainId(domains[0]._id);
         }
     }, [domains, selectedDomainId]);
 
-    // Fetch products when domain changes
     useEffect(() => {
         if (selectedDomainId) {
-            setCurrentPage(1);
             fetchProducts(selectedDomainId);
         }
     }, [selectedDomainId, fetchProducts]);
 
-    // Reset to page 1 when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filters]);
-
-    // Show error toast
     useEffect(() => {
         if (error) {
             showToast("error", error);
@@ -121,7 +86,7 @@ export default function ProductsPage() {
                 showToast("success", "Product created successfully!");
                 setCreateModalOpen(false);
             } catch (err) {
-                // Error already handled by store
+                // Error handled by store
             }
         },
         [selectedDomainId, createProduct, showToast]
@@ -136,7 +101,7 @@ export default function ProductsPage() {
                 setEditModalOpen(false);
                 setSelectedProduct(null);
             } catch (err) {
-                // Error already handled by store
+                // Error handled by store
             }
         },
         [selectedDomainId, updateProduct, showToast]
@@ -150,7 +115,7 @@ export default function ProductsPage() {
             setDeleteModalOpen(false);
             setProductToDelete(null);
         } catch (err) {
-            // Error already handled by store
+            // Error handled by store
         }
     }, [selectedDomainId, deleteProduct, productToDelete, showToast]);
 
@@ -166,7 +131,7 @@ export default function ProductsPage() {
                     `Product ${newStatus ? "activated" : "deactivated"} successfully!`
                 );
             } catch (err) {
-                // Error already handled by store
+                // Error handled by store
             }
         },
         [selectedDomainId, toggleProductStatus, products, showToast]
@@ -182,65 +147,49 @@ export default function ProductsPage() {
         setDeleteModalOpen(true);
     }, []);
 
-    const handleRefresh = useCallback(() => {
-        if (selectedDomainId) {
-            fetchProducts(selectedDomainId);
-            showToast("success", "Products refreshed!");
-        }
-    }, [selectedDomainId, fetchProducts, showToast]);
-
-    const handlePageChange = useCallback((page: number) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, []);
-
-    const selectedDomain = domains.find((d) => d._id === selectedDomainId);
-
-    // Check product limit (free plan: 3 products)
     const canCreateProduct = products.filter((p) => p.isActive).length < 3;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                Product Management
-                            </h1>
-                            <p className="text-gray-600 mt-1">
-                                Manage products that your chatbot can recommend
-                            </p>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20">
+            {/* Hero Header */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 border-b-4 border-indigo-700">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAgMi4yMS0xLjc5IDQtNCA0cy00LTEuNzktNC00IDEuNzktNCA0LTQgNCAxLjc5IDQgNHptLTQgMjhjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00em0yMC0yMGMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCA0LTEuNzkgNC00LTEuNzktNC00LTR6bTAgMjBjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00ek0xMiAyNGMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCA0LTEuNzkgNC00LTEuNzktNC00LTR6bTAgMjBjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
+
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="flex items-center justify-between flex-wrap gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                                <Sparkles className="text-white" size={32} />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-black text-white mb-1">
+                                    Product Catalog
+                                </h1>
+                                <p className="text-indigo-100 text-lg">
+                                    Manage products for your AI chatbot
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleRefresh}
-                                disabled={loading || !selectedDomainId}
-                                className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                            >
-                                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                                Refresh
-                            </button>
-                            <button
-                                onClick={() => setCreateModalOpen(true)}
-                                disabled={!selectedDomainId || !canCreateProduct}
-                                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium flex items-center gap-2 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title={
-                                    !canCreateProduct
-                                        ? "Free plan limited to 3 active products"
-                                        : ""
-                                }
-                            >
-                                <Plus size={20} />
-                                Add Product
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setCreateModalOpen(true)}
+                            disabled={!selectedDomainId || !canCreateProduct}
+                            className="px-8 py-4 bg-white text-indigo-600 rounded-2xl hover:bg-indigo-50 transition-all duration-200 font-bold flex items-center gap-3 shadow-2xl hover:shadow-indigo-900/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            title={
+                                !canCreateProduct
+                                    ? "Free plan limited to 3 active products"
+                                    : ""
+                            }
+                        >
+                            <Plus size={24} />
+                            Add Product
+                        </button>
                     </div>
+
                     {!canCreateProduct && selectedDomainId && (
-                        <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                            <p className="text-sm text-yellow-800">
-                                <strong>Product Limit Reached:</strong> Free plan is limited to 3
+                        <div className="mt-6 bg-yellow-400/20 backdrop-blur-sm border-2 border-yellow-400 rounded-2xl p-4">
+                            <p className="text-sm text-white font-semibold">
+                                ⚠️ <strong>Product Limit Reached:</strong> Free plan is limited to 3
                                 active products. Upgrade to add more.
                             </p>
                         </div>
@@ -250,80 +199,25 @@ export default function ProductsPage() {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Domain Selector */}
-                <DomainSelector
+                {/* Filters with Stats */}
+                <ProductFilters
                     domains={domains}
                     selectedDomainId={selectedDomainId}
                     onDomainChange={handleDomainChange}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    products={products}
                 />
 
+                {/* Products Table */}
                 {selectedDomainId && (
-                    <>
-                        {/* Stats */}
-                        {!loading && products.length > 0 && (
-                            <ProductStatsCard products={products} />
-                        )}
-
-                        {/* Filters */}
-                        {!loading && products.length > 0 && (
-                            <ProductFilters
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                                categories={categories}
-                            />
-                        )}
-
-                        {/* Loading State */}
-                        {loading && <ProductSkeletonGrid count={9} />}
-
-                        {/* Empty State */}
-                        {!loading && products.length === 0 && (
-                            <ProductEmptyState
-                                hasFilters={false}
-                                onClearFilters={() => handleFilterChange({})}
-                                onCreateClick={() => setCreateModalOpen(true)}
-                            />
-                        )}
-
-                        {/* No Results */}
-                        {!loading &&
-                            products.length > 0 &&
-                            filteredProducts.length === 0 && (
-                                <ProductEmptyState
-                                    hasFilters={hasActiveFilters}
-                                    onClearFilters={() => handleFilterChange({})}
-                                    onCreateClick={() => setCreateModalOpen(true)}
-                                />
-                            )}
-
-                        {/* Products Grid */}
-                        {!loading && paginatedProducts.length > 0 && (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {paginatedProducts.map((product) => (
-                                        <ProductCard
-                                            key={product._id}
-                                            product={product}
-                                            onToggle={handleToggle}
-                                            onEdit={handleEdit}
-                                            onDelete={handleDelete}
-                                        />
-                                    ))}
-                                </div>
-
-                                {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <Pagination
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        onPageChange={handlePageChange}
-                                        totalItems={filteredProducts.length}
-                                        itemsPerPage={itemsPerPage}
-                                    />
-                                )}
-                            </>
-                        )}
-                    </>
+                    <ProductTable
+                        products={filteredProducts}
+                        loading={loading}
+                        onToggle={handleToggle}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
                 )}
             </div>
 
@@ -356,7 +250,7 @@ export default function ProductsPage() {
                 onConfirm={handleDeleteProduct}
             />
 
-            {/* Toast Notifications */}
+            {/* Toast */}
             <Popup
                 open={toast.open}
                 type={toast.type}

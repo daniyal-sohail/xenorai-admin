@@ -98,19 +98,19 @@ const MovingCards = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <span className="text-white text-2xl font-bold tracking-wide">SELLRGRID</span>
+                    <span className="text-white text-2xl font-bold tracking-wide">XenorAi</span>
                 </div>
 
                 {/* Headline */}
                 <div className="absolute bottom-0 left-0 w-full p-8 z-20">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 leading-tight">
-                        PREMIUM DIGITAL PRODUCTS<br />
+                        AI Powered Chatbot<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600">
                             AT YOUR FINGERTIPS
                         </span>
                     </h1>
                     <p className="text-md md:text-lg text-gray-200 max-w-3xl leading-relaxed">
-                        Discover, learn, and build with expert knowledge from successful entrepreneurs
+                        AI sales chatbot built to convert visitors into revenue
                     </p>
                 </div>
 

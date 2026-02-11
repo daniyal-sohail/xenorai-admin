@@ -68,6 +68,7 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const formData = new FormData();
+            formData.append("domainId", domainId);
             formData.append("name", data.name);
             formData.append("price", String(data.price));
 
@@ -77,7 +78,7 @@ export const ProductApi = {
             if (data.image) formData.append("image", data.image);
 
             const res = await API.post(
-                `/${domainId}/products`,
+                `/products/${domainId}/products`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -103,7 +104,7 @@ export const ProductApi = {
     ): Promise<IProduct[]> => {
         try {
             const res = await API.get(
-                `/${domainId}/products`,
+                `/products/${domainId}/products`,
                 { params }
             );
             return res.data.data.products;
@@ -118,7 +119,7 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const res = await API.get(
-                `/${domainId}/products/${productId}`
+                `/products/${domainId}/products/${productId}`
             );
             return res.data.data.product;
         } catch (error) {
@@ -140,6 +141,7 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const formData = new FormData();
+            formData.append("domainId", domainId);
             Object.entries(data).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
                     formData.append(key, value as any);
@@ -147,7 +149,7 @@ export const ProductApi = {
             });
 
             const res = await API.put(
-                `/${domainId}/products/${productId}`,
+                `/products/${domainId}/products/${productId}`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -163,7 +165,7 @@ export const ProductApi = {
         productId: string
     ): Promise<void> => {
         try {
-            await API.delete(`/${domainId}/products/${productId}`);
+            await API.delete(`/products/${domainId}/products/${productId}`);
         } catch (error) {
             return handleError(error);
         }
@@ -175,7 +177,8 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const res = await API.patch(
-                `/${domainId}/products/${productId}/toggle`
+                `/products/${domainId}/products/${productId}/toggle`,
+                { domainId }
             );
             return res.data.data.product;
         } catch (error) {

@@ -8,6 +8,10 @@ export interface ILead {
     email: string;
     name?: string | null;
     phone?: string | null;
+    productsInterested?: string[];
+    recommendedProduct?: string | null;
+    tags?: string[];
+    conversationId?: string;
     createdAt: string;
     updatedAt: string;
 }

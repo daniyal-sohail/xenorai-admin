@@ -8,6 +8,7 @@ export interface IUser {
     email: string;
     profileImage?: string;
     role?: string;
+    authProvider?: "email" | "google";
 }
 
 export interface IAuthResponse {

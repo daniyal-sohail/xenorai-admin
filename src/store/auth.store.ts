@@ -27,6 +27,15 @@ interface AuthState {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshAccessToken: () => Promise<void>;
+    updatePassword: (data: {
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+    }) => Promise<void>;
+    setPassword: (data: {
+        newPassword: string;
+        confirmPassword: string;
+    }) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -40,14 +49,16 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
 
             setUser: (user) => set({ user, isAuthenticated: !!user }),
-            setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken, isAuthenticated: !!accessToken }),
-            clearAuth: () => set({
-                user: null,
-                accessToken: "",
-                refreshToken: "",
-                isAuthenticated: false,
-                error: null
-            }),
+            setTokens: (accessToken, refreshToken) =>
+                set({ accessToken, refreshToken, isAuthenticated: !!accessToken }),
+            clearAuth: () =>
+                set({
+                    user: null,
+                    accessToken: "",
+                    refreshToken: "",
+                    isAuthenticated: false,
+                    error: null,
+                }),
 
             register: async (payload) => {
                 try {
@@ -57,10 +68,11 @@ export const useAuthStore = create<AuthState>()(
                         user: data.user,
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
-                        isAuthenticated: true
+                        isAuthenticated: true,
                     });
                 } catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : "Registration failed";
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Registration failed";
                     set({ error: errorMessage });
                     throw err;
                 } finally {
@@ -76,10 +88,11 @@ export const useAuthStore = create<AuthState>()(
                         user: data.user,
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
-                        isAuthenticated: true
+                        isAuthenticated: true,
                     });
                 } catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : "Login failed";
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Login failed";
                     set({ error: errorMessage });
                     throw err;
                 } finally {
@@ -93,7 +106,8 @@ export const useAuthStore = create<AuthState>()(
                     await AuthApi.logout();
                     get().clearAuth();
                 } catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : "Logout failed";
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Logout failed";
                     set({ error: errorMessage });
                     throw err;
                 } finally {
@@ -106,9 +120,38 @@ export const useAuthStore = create<AuthState>()(
                     const { accessToken } = await AuthApi.refreshToken();
                     set({ accessToken, isAuthenticated: true });
                 } catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : "Failed to refresh token";
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Failed to refresh token";
                     set({ error: errorMessage, isAuthenticated: false });
                     // Don't throw, just clear auth on token refresh failure
+                }
+            },
+
+            updatePassword: async (data) => {
+                try {
+                    set({ loading: true, error: null });
+                    await AuthApi.updatePassword(data);
+                } catch (err) {
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Failed to update password";
+                    set({ error: errorMessage });
+                    throw err;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            setPassword: async (data) => {
+                try {
+                    set({ loading: true, error: null });
+                    await AuthApi.setPassword(data);
+                } catch (err) {
+                    const errorMessage =
+                        err instanceof Error ? err.message : "Failed to set password";
+                    set({ error: errorMessage });
+                    throw err;
+                } finally {
+                    set({ loading: false });
                 }
             },
         }),

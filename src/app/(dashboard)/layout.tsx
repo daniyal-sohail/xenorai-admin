@@ -10,7 +10,7 @@ import { useAuthStore } from "@/store/auth.store";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const { sidebarOpen, setSidebarOpen } = useUIStore();
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated, user, clearAuth } = useAuthStore();
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
@@ -27,6 +27,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         return () => clearTimeout(timer);
     }, [isAuthenticated, user, router]);
+
+    // Listen for storage changes (e.g., auth cleared in another tab or by API interceptor)
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "auth-storage" && e.newValue === null) {
+                console.log("🔒 Auth cleared, redirecting to sign-in...");
+                clearAuth();
+                router.push("/sign-in");
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, [clearAuth, router]);
 
     // Show loading while checking authentication
     if (isChecking || !isAuthenticated || !user) {
@@ -47,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="transition-all duration-300 ease-in-out xl:ml-64">
                 <Header />
 
-                <main className="h-[calc(100vh-64px)] overflow-y-auto hide-scrollbar p-4 sm:p-6 lg:p-8">
+                <main className="h-[calc(100vh-64px)] overflow-y-auto hide-scrollbar px-4 sm:px-6 lg:px-8 py-8">
                     <div className="max-w-full">{children}</div>
                 </main>
             </div>
