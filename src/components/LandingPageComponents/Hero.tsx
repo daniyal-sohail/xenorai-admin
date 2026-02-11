@@ -18,7 +18,10 @@ const HeroSection = () => {
             {/* Gradient Background */}
             <div className="absolute inset-0  pointer-events-none z-0"></div>
 
-            <div className="max-w-6xl mx-auto px-6 pt-40 relative z-10">
+            {/* Decorative Background Shape */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 rounded-full opacity-30 blur-3xl pointer-events-none z-0"></div>
+
+            <div className="max-w-7xl mx-auto px-6 pt-40 relative z-10">
                 {/* Badge */}
                 <div
                     className={`flex cursor-pointer justify-center mb-2 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
@@ -27,7 +30,7 @@ const HeroSection = () => {
                     <div className="inline-flex items-center justify-between gap-3 px-5 py-1.5  rounded-full border border-gray-300">
 
                         <div className="w-2 h-2 bg-[#F97518] rounded-full animate-pulse"></div>
-                        <span className="text-gray-500 text-sm font-medium">Upcoming version 2.0</span>
+                        <span className="text-gray-500 text-sm font-medium">Now in Early Access</span>
                     </div>
                 </div>
 
@@ -36,8 +39,8 @@ const HeroSection = () => {
                     className={`text-center mb-7 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
                         }`}
                 >
-                    <h1 className="text-[60px] font-[500] text-[#1e0d01] leading-[52.5px]">
-                        Launch your AI or SaaS<br />startup in days
+                    <h1 className="text-[60px] font-[500] text-[#1e0d01] leading-[54.5px]">
+                        AI sales chatbot built to<br />convert visitors into revenue
                     </h1>
 
 
@@ -49,24 +52,27 @@ const HeroSection = () => {
                         }`}
                 >
                     <p className="text-[19px] text-gray-500 leading-relaxed max-w-3xl mx-auto font-normal">
-                        Built for SaaS founders, solo creators, and lean agencies who need to launch fast,<br />
-                        look polished, and make a bold impression from day one.
+                        XenorAi is an AI-powered website chatbot that answers instantly,<br />
+                        qualifies leads, and supports your customers  24/7, without human effort.
                     </p>
                 </div>
 
                 {/* CTA Button */}
-                <div
-                    className={`flex justify-center mb-20 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-                        }`}
-                >
+                <form className="mx-auto mt-10 mb-20 max-w-xl  relative mb-2">
+                    <input
+                        type="email"
+                        required
+                        placeholder="Enter your email"
+                        className="w-full rounded-full border border-gray-200 bg-white px-6 py-4 pr-48 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/60"
+                    />
                     <Link
                         href="mailto:skillhiveclub@ucp.edu.pk"
-                        className="group bg-[#F97518] text-white h-13 w-42 rounded-full py-2 px-2 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 no-underline"
+                        className="group absolute right-2 top-1/2 -translate-y-1/2 bg-[#F97518] text-white rounded-full py-2 px-4 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 no-underline"
                     >
-                        <span className="mr-2 text-[18px]">Let's Collab</span>
-                        <ArrowRight className="w-6 h-6 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
+                        <span className="mr-2 text-[16px] whitespace-nowrap">Get Early Access</span>
+                        <ArrowRight className="w-5 h-5 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
                     </Link>
-                </div>
+                </form>
 
                 {/* Social Proof */}
                 <div
@@ -77,33 +83,22 @@ const HeroSection = () => {
                         {/* Avatars */}
 
                         <div className="flex items-center">
-                            <span className="text-gray-700 font-medium text-[15px]">Powered By DevXcript</span>
+                            <span className="text-gray-700 font-medium text-[15px]">Built by DevXcript
+                            </span>
                         </div>
                         {/* Divider */}
                         <div className="w-px h-8 bg-gray-200"></div>
 
                         {/* Reviews */}
                         <div className="flex items-center">
-                            <span className="text-gray-700 font-medium text-[15px]">2.4k+ Reviews</span>
+                            <span className="text-gray-700 font-medium text-[15px]"> AI-Powered </span>
                         </div>
-
-                        {/* Divider */}
                         <div className="w-px h-8 bg-gray-200"></div>
-
-                        {/* Rating */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-900 font-semibold text-[15px]">5.0</span>
-                            <div className="flex gap-0.5">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg key={i} width="17" height="17" viewBox="0 0 24 24" fill="none">
-                                        <path
-                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                                            fill="#FDB022"
-                                        />
-                                    </svg>
-                                ))}
-                            </div>
+                        <div className="flex items-center">
+                            <span className="text-gray-700 font-medium text-[15px]">  Designed for Real Sales</span>
                         </div>
+
+
                     </div>
                 </div>
 

@@ -8,10 +8,11 @@ const Navbar: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
     const navLinks = [
-        { name: "Home", href: "/" },
         { name: "About", href: "#about" },
-        { name: "Events", href: "#events" },
-        { name: "Hierarchy", href: "#why-join" },
+        { name: "Features", href: "#features" },
+        { name: "Benefits", href: "#benefits" },
+        { name: "Pricing", href: "#pricing" },
+        { name: "FAQ", href: "#faq" },
     ];
 
     const navLinkClasses =
@@ -27,9 +28,9 @@ const Navbar: React.FC = () => {
         const element = document.getElementById(targetId);
 
         if (element) {
-            const navbarHeight = 128; // Height of navbar (h-32 = 128px)
+            const navbarHeight = 80; // Adjusted offset for better positioning
             const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+            const offsetPosition = elementPosition + window.scrollY - navbarHeight;
 
             window.scrollTo({
                 top: offsetPosition,
@@ -48,18 +49,14 @@ const Navbar: React.FC = () => {
                     <div className="w-full h-4 flex items-center px-5">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <path
-                                        d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"
-                                        fill="white"
-                                        stroke="white"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-                            </div>
+                            <Image
+                                src="/logo.png"   // put your icon here
+                                alt="Logo"
+                                width={50}
+                                height={50}
+                                className="object-contain"
+                                priority
+                            />
                         </Link>
 
                         {/* Navigation Links */}
@@ -88,7 +85,7 @@ const Navbar: React.FC = () => {
                                 href="mailto:skillhiveclub@ucp.edu.pk"
                                 className="group bg-[#F97518] text-white h-10 w-36 rounded-full py-2 px-2 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 no-underline"
                             >
-                                <span className="mr-2">Let's Collab</span>
+                                <span className="mr-2">Join Wishlist</span>
                                 <ArrowRight className="w-4 h-4 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
                             </Link>
                         </div>
@@ -104,16 +101,23 @@ const Navbar: React.FC = () => {
 
                     {/* Logo */}
                     <div className="absolute left-4 top-2 flex items-center h-10">
-                        <div className="relative w-12 h-12 mr-2">
-                            <Image src="/images/logos/logo.png" alt="Logo" fill className="object-contain" />
-                        </div>
+                        <Link href="/" className="flex items-center gap-2.5">
+                            <Image
+                                src="/logo.png"
+                                alt="Logo"
+                                width={48}
+                                height={48}
+                                className="object-contain"
+                                priority
+                            />
+                        </Link>
                     </div>
 
                     {/* Menu Button */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         aria-label="Toggle menu"
-                        className="absolute top-2 right-2 w-9 h-9 rounded-full bg-[#3d6b1f] shadow flex items-center justify-center z-10"
+                        className="absolute top-2 right-2 w-9 h-9 rounded-full bg-[#F97518] shadow flex items-center justify-center z-10"
                     >
                         {isMobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
                     </button>
@@ -145,7 +149,7 @@ const Navbar: React.FC = () => {
                         <div className="p-4 border-t border-gray-100 mt-2">
                             <Link
                                 href="mailto:skillhiveclub@ucp.edu.pk"
-                                className="group w-full bg-[#3d6b1f] text-white py-3 px-4 rounded-full font-medium hover:bg-[#2d5016] transition-all duration-300 flex justify-center items-center shadow-lg no-underline"
+                                className="group w-full bg-[#F97518] text-white py-3 px-4 rounded-full font-medium hover:bg-[#e86b13] transition-all duration-300 flex justify-center items-center shadow-lg no-underline"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <span className="mr-2">Let's Collab</span>

@@ -6,21 +6,23 @@ import Footer from '@/components/LandingPageComponents/Footer'
 import Hero from '@/components/LandingPageComponents/Hero'
 import HowWorks from '@/components/LandingPageComponents/HowWorks'
 import Navbar from '@/components/LandingPageComponents/Navbar'
+import Newsletter from '@/components/LandingPageComponents/NewsLetter'
 import Plans from '@/components/LandingPageComponents/Plans'
 import React from 'react'
 
 function page() {
   return (
-    <main className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-16 bg-gradient-to-br from-orange-50 via-pink-50 to-white">
+    <main className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-16 ">
       <div className="max-w-[1280px] mx-auto ">
         <Navbar />
         <Hero />
         <About />
-        <Benefits />
-        <HowWorks />
         <Features />
+        <HowWorks />
+        <Benefits />
         <Plans />
         <FAQ />
+        <Newsletter />
         <Footer />
       </div>
     </main>
