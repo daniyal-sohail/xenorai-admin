@@ -1,5 +1,6 @@
 'use client';
 
+import { Brain, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 const About = () => {
@@ -50,15 +51,28 @@ const About = () => {
         <section id="about" ref={sectionRef} className="relative py-10 md:py-20 overflow-hidden mt-8">
             <div className="max-w-7xl mx-auto px-6">
                 {/* Badge */}
-                <div className="mb-10">
-                    <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200/50">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span className="text-gray-700 font-medium text-[15px]">About XenorAi</span>
-                    </div>
+                <div className="inline-flex items-center gap-2.5 px-5 py-1.5 
+    border border-gray-200 
+    bg-white 
+    rounded-full 
+    shadow-sm 
+    mb-2 
+    group 
+    hover:shadow-md 
+    hover:border-orange-300 
+    transition-all duration-300">
+
+                    <Brain
+                        className="w-5 h-5 text-orange-500 
+        transition-all duration-300 
+        group-hover:scale-110"
+                    />
+
+                    <span className="text-gray-700 font-medium text-[15px] 
+        transition-colors duration-300 
+        group-hover:text-black">
+                        About XenorAi
+                    </span>
                 </div>
 
                 {/* Text + First Row Pills */}

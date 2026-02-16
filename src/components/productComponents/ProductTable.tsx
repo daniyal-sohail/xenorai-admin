@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo, useState } from "react";
-import { Edit2, Trash2, Power, ExternalLink, Package, MoreVertical, Image as ImageIcon } from "lucide-react";
+import { Edit2, Trash2, Power, ExternalLink, Package } from "lucide-react";
 import { IProduct } from "./ProductTypes";
 
 interface ProductTableProps {
@@ -12,6 +12,57 @@ interface ProductTableProps {
   onDelete: (id: string) => void;
 }
 
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price);
+
+const ActionBtn: FC<{
+  onClick: () => void;
+  title: string;
+  variant: "edit" | "delete" | "link";
+  children: React.ReactNode;
+  href?: string;
+}> = ({ onClick, title, variant, children, href }) => {
+  const [hovered, setHovered] = useState(false);
+
+  const styles = {
+    edit: { base: { color: "#6b7280", background: "transparent" }, hover: { color: "#f97518", background: "rgba(249,117,24,0.08)" } },
+    delete: { base: { color: "#6b7280", background: "transparent" }, hover: { color: "#ef4444", background: "rgba(239,68,68,0.08)" } },
+    link: { base: { color: "#6b7280", background: "transparent" }, hover: { color: "#3b82f6", background: "rgba(59,130,246,0.08)" } },
+  };
+
+  const style = hovered ? styles[variant].hover : styles[variant].base;
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={title}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+        style={style}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+      style={style}
+    >
+      {children}
+    </button>
+  );
+};
+
 const ProductTableComponent: FC<ProductTableProps> = ({
   products,
   loading,
@@ -19,26 +70,20 @@ const ProductTableComponent: FC<ProductTableProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
-
-  const handleImageError = (productId: string) => {
-    setImageErrors((prev) => new Set(prev).add(productId));
-  };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
-        <div className="p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading products...</p>
+      <div
+        className="rounded-2xl overflow-hidden bg-white"
+        style={{ border: "1px solid #e5e7eb" }}
+      >
+        <div className="p-12 flex flex-col items-center justify-center gap-3">
+          <span
+            className="w-8 h-8 rounded-full border-2 animate-spin"
+            style={{ borderColor: "rgba(249,117,24,0.2)", borderTopColor: "#f97518" }}
+          />
+          <p className="text-sm text-gray-500 font-medium">Loading products…</p>
         </div>
       </div>
     );
@@ -46,153 +91,146 @@ const ProductTableComponent: FC<ProductTableProps> = ({
 
   if (products.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
-        <div className="p-16 text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center">
-            <Package className="text-indigo-600" size={40} />
+      <div
+        className="rounded-2xl overflow-hidden bg-white"
+        style={{ border: "1px solid #e5e7eb" }}
+      >
+        <div className="p-16 flex flex-col items-center justify-center text-center">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+            style={{ background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)" }}
+          >
+            <Package size={28} style={{ color: "#f97518" }} />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">No Products Yet</h3>
-          <p className="text-gray-600">Get started by adding your first product</p>
+          <h3 className="text-base font-bold text-gray-900 mb-1">No Products Yet</h3>
+          <p className="text-sm text-gray-500">Get started by adding your first product</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
-      {/* Table Header */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-bold text-gray-700 uppercase tracking-wider">
-          <div className="col-span-1">Image</div>
-          <div className="col-span-3">Product</div>
-          <div className="col-span-2">Category</div>
-          <div className="col-span-2">Price</div>
-          <div className="col-span-2">Status</div>
-          <div className="col-span-2 text-right">Actions</div>
-        </div>
-      </div>
-
-      {/* Table Body */}
-      <div className="divide-y-2 divide-gray-100">
-        {products.map((product, index) => (
-          <div
-            key={product._id}
-            className="grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50 transition-all duration-200 items-center group"
-            style={{
-              animation: `fadeIn 0.3s ease-out ${index * 0.05}s both`,
-            }}
-          >
-            {/* Product Image */}
-            <div className="col-span-1">
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 shadow-md group-hover:shadow-lg transition-shadow">
-                {product.image && !imageErrors.has(product._id) ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={() => handleImageError(product._id)}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package size={28} className="text-gray-400" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Product Details */}
-            <div className="col-span-3">
-              <h3 className="font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                {product.name}
-              </h3>
-              {product.description && (
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {product.description}
-                </p>
-              )}
-            </div>
-
-            {/* Category */}
-            <div className="col-span-2">
-              {product.category ? (
-                <span className="inline-flex px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg">
-                  {product.category}
-                </span>
-              ) : (
-                <span className="text-gray-400 text-sm">No category</span>
-              )}
-            </div>
-
-            {/* Price */}
-            <div className="col-span-2">
-              <p className="text-xl font-bold text-gray-900">
-                {formatPrice(product.price)}
-              </p>
-            </div>
-
-            {/* Status */}
-            <div className="col-span-2">
-              <button
-                onClick={() => onToggle(product._id)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 hover:scale-105 ${product.isActive
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${product.isActive ? "bg-emerald-500" : "bg-gray-400"
-                    }`}
-                />
-                {product.isActive ? "Active" : "Inactive"}
-              </button>
-            </div>
-
-            {/* Actions */}
-            <div className="col-span-2 flex items-center justify-end gap-2">
-              {product.checkoutLink && (
-                <a
-                  href={product.checkoutLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-all hover:scale-110"
-                  title="View Product"
+    <div
+      className="rounded-2xl overflow-hidden bg-white"
+      style={{ border: "1px solid #e5e7eb" }}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr style={{ borderBottom: "1px solid #f3f4f6", background: "#fafafa" }}>
+              {[
+                { label: "Product", cls: "px-5 text-left" },
+                { label: "Category", cls: "px-4 text-left hidden sm:table-cell" },
+                { label: "Price", cls: "px-4 text-left" },
+                { label: "Status", cls: "px-4 text-left" },
+                { label: "Actions", cls: "px-4 text-right" },
+              ].map(({ label, cls }) => (
+                <th
+                  key={label}
+                  className={`${cls} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400`}
                 >
-                  <ExternalLink size={18} />
-                </a>
-              )}
-
-              <button
-                onClick={() => onEdit(product)}
-                className="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-xl hover:bg-indigo-200 transition-all hover:scale-110"
-                title="Edit Product"
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product, index) => (
+              <tr
+                key={product._id}
+                className="group transition-colors hover:bg-gray-50/80"
+                style={{ borderBottom: index < products.length - 1 ? "1px solid #f3f4f6" : "none" }}
               >
-                <Edit2 size={18} />
-              </button>
+                {/* Product */}
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+                      style={{ background: "#f9fafb", border: "1px solid #e5e7eb" }}
+                    >
+                      {product.image && !imageErrors.has(product._id) ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={() => setImageErrors((prev) => new Set(prev).add(product._id))}
+                        />
+                      ) : (
+                        <Package size={16} className="text-gray-400" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate leading-tight group-hover:text-[#f97518] transition-colors">
+                        {product.name}
+                      </p>
+                      {product.description && (
+                        <p className="text-xs text-gray-400 truncate mt-0.5 max-w-[200px]">
+                          {product.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </td>
 
-              <button
-                onClick={() => onDelete(product._id)}
-                className="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-all hover:scale-110"
-                title="Delete Product"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          </div>
-        ))}
+                {/* Category */}
+                <td className="px-4 py-3.5 hidden sm:table-cell">
+                  {product.category ? (
+                    <span
+                      className="inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold"
+                      style={{ background: "rgba(249,117,24,0.08)", color: "#ea5a00", border: "1px solid rgba(249,117,24,0.15)" }}
+                    >
+                      {product.category}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">—</span>
+                  )}
+                </td>
+
+                {/* Price */}
+                <td className="px-4 py-3.5">
+                  <span className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</span>
+                </td>
+
+                {/* Status */}
+                <td className="px-4 py-3.5">
+                  <button
+                    onClick={() => onToggle(product._id)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+                    style={
+                      product.isActive
+                        ? { background: "rgba(52,211,153,0.1)", color: "#059669", border: "1px solid rgba(52,211,153,0.25)" }
+                        : { background: "#f9fafb", color: "#9ca3af", border: "1px solid #e5e7eb" }
+                    }
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: product.isActive ? "#34d399" : "#d1d5db" }}
+                    />
+                    {product.isActive ? "Active" : "Inactive"}
+                  </button>
+                </td>
+
+                {/* Actions */}
+                <td className="px-4 py-3.5">
+                  <div className="flex items-center justify-end gap-0.5">
+                    {product.checkoutLink && (
+                      <ActionBtn onClick={() => { }} title="View Product" variant="link" href={product.checkoutLink}>
+                        <ExternalLink size={14} />
+                      </ActionBtn>
+                    )}
+                    <ActionBtn onClick={() => onEdit(product)} title="Edit" variant="edit">
+                      <Edit2 size={14} />
+                    </ActionBtn>
+                    <ActionBtn onClick={() => onDelete(product._id)} title="Delete" variant="delete">
+                      <Trash2 size={14} />
+                    </ActionBtn>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <style jsx>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            `}</style>
     </div>
   );
 };

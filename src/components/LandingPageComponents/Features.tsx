@@ -1,16 +1,17 @@
 'use client';
 
+import { Sparkles, Zap } from 'lucide-react';
 import Image from 'next/image';
 
 const Features = () => {
     const mainFeatures = [
         {
-            image: '/one.png', // Replace with your image
+            image: '/1.png', // Replace with your image
             title: 'AI-Powered Chatbot',
             description: 'Engage visitors instantly with an intelligent chatbot that answers questions, qualifies leads, and drives conversions.',
         },
         {
-            image: '/one.png', // Replace with your image
+            image: '/2.png', // Replace with your image
             title: 'Multi-Domain Management',
             description: 'Manage chatbots across multiple websites from a single dashboard for seamless business operations.',
         },
@@ -18,17 +19,17 @@ const Features = () => {
 
     const bottomFeatures = [
         {
-            image: '/one.png', // Replace with your image
+            image: '/3.png', // Replace with your image
             title: 'Live Analytics & Reports',
             description: 'Track all conversations, lead generation, and revenue metrics in real-time with intuitive dashboards.',
         },
         {
-            image: '/one.png', // Replace with your image
+            image: '/4.png', // Replace with your image
             title: 'Voice & Multi-Language Support',
             description: 'Chat with customers in their preferred language or even through voice commands for a human-like experience.',
         },
         {
-            image: '/one.png', // Replace with your image
+            image: '/5.png', // Replace with your image
             title: 'Automated Email Campaigns',
             description: 'Collect emails from chats and run automated campaigns to nurture leads and drive sales.',
         },
@@ -40,12 +41,15 @@ const Features = () => {
                 {/* Header */}
                 <div className="text-center mb-14">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-300 rounded-full  shadow-sm mb-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                            <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                        <span className="text-gray-700 font-medium text-[15px]">Key Features</span>
+                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-200 bg-white rounded-full shadow-sm mb-2 group hover:shadow-md transition-all duration-300">
+
+                        <Sparkles
+                            className="w-5 h-5 text-orange-500 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300"
+                        />
+
+                        <span className="text-gray-700 font-medium text-[15px]">
+                            Key Features
+                        </span>
                     </div>
 
 
@@ -74,12 +78,12 @@ const Features = () => {
                         >
                             {/* Image Preview */}
                             <div className="bg-white rounded-2xl mb-8 shadow-sm">
-                                <div className="aspect-[4/2] relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
+                                <div className="aspect-[4/2] relative  rounded-xl overflow-hidden">
                                     <Image
                                         src={feature.image}
                                         alt={feature.title}
                                         fill
-                                        className="object-cover"
+                                        className="object-contain"
                                     />
 
                                     {/* Placeholder if no image */}

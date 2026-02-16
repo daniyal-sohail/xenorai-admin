@@ -5,13 +5,28 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react';
+import { useForm } from '@formspree/react';
+import { Popup } from '@/components/common/PopUp';
 
 const HeroSection = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const [state, handleSubmit] = useForm("mreakbkq");
+    const [popupOpen, setPopupOpen] = useState(false);
+    const [popupType, setPopupType] = useState<'success' | 'error'>('success');
 
     useEffect(() => {
         setIsVisible(true);
     }, []);
+
+    useEffect(() => {
+        if (state.succeeded) {
+            setPopupType('success');
+            setPopupOpen(true);
+        } else if (state.errors && Object.keys(state.errors).length > 0) {
+            setPopupType('error');
+            setPopupOpen(true);
+        }
+    }, [state.succeeded, state.errors]);
 
     return (
         <section className="relative min-h-screen overflow-hidden">
@@ -58,21 +73,40 @@ const HeroSection = () => {
                 </div>
 
                 {/* CTA Button */}
-                <form className="mx-auto mt-10 mb-20 max-w-xl  relative mb-2">
+                <form onSubmit={handleSubmit} className="mx-auto mt-10 mb-20 max-w-xl  relative mb-2">
                     <input
+                        id="email"
                         type="email"
+                        name="email"
                         required
                         placeholder="Enter your email"
-                        className="w-full rounded-full border border-gray-200 bg-white px-6 py-4 pr-48 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/60"
+                        disabled={state.submitting}
+                        className="w-full rounded-full border border-gray-200 bg-white px-6 py-4 pr-48 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/60 disabled:opacity-50"
                     />
-                    <Link
-                        href="mailto:skillhiveclub@ucp.edu.pk"
-                        className="group absolute right-2 top-1/2 -translate-y-1/2 bg-[#F97518] text-white rounded-full py-2 px-4 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 no-underline"
+                    <button
+                        type="submit"
+                        disabled={state.submitting}
+                        className="group absolute right-2 top-1/2 -translate-y-1/2 bg-[#F97518] text-white rounded-full py-2 px-4 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span className="mr-2 text-[16px] whitespace-nowrap">Get Early Access</span>
+                        <span className="mr-2 text-[16px] whitespace-nowrap">
+                            {state.submitting ? 'Submitting...' : 'Get Early Access'}
+                        </span>
                         <ArrowRight className="w-5 h-5 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
-                    </Link>
+                    </button>
                 </form>
+
+                <Popup
+                    open={popupOpen}
+                    type={popupType}
+                    title={popupType === 'success' ? 'Success!' : 'Error'}
+                    message={
+                        popupType === 'success'
+                            ? "Awesome! 🎉 You're on the list for XenorAi early access. We'll notify you as soon as it's ready!"
+                            : "Oops! Something went wrong. Please double-check your email and try again."
+
+                    }
+                    onClose={() => setPopupOpen(false)}
+                />
 
                 {/* Social Proof */}
                 <div

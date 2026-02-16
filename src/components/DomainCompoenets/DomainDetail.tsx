@@ -2,8 +2,18 @@
 
 import { FC, useState, useCallback } from "react";
 import {
-    ArrowLeft, Copy, Check, Power, Trash2, Settings,
-    Globe, Code2, ExternalLink, Activity, MessageSquare, Building2,
+    ArrowLeft,
+    Copy,
+    Check,
+    Power,
+    Trash2,
+    Settings,
+    Globe,
+    Code2,
+    ExternalLink,
+    Activity,
+    MessageSquare,
+    Building2,
 } from "lucide-react";
 import { IDomain } from "./DomainTypes";
 
@@ -16,17 +26,22 @@ interface DomainDetailProps {
     onToggle: (id: string) => void;
 }
 
-const toneLabels: Record<string, { label: string; color: string }> = {
-    professional: { label: "Professional", color: "bg-blue-50 text-blue-700 border-blue-100" },
-    friendly: { label: "Friendly", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-    salesy: { label: "Salesy", color: "bg-amber-50 text-amber-700 border-amber-100" },
-};
-
-const industryLabels: Record<string, { label: string; emoji: string }> = {
-    ecommerce: { label: "E-commerce", emoji: "🛍️" },
-    services: { label: "Services", emoji: "🔧" },
-    saas: { label: "SaaS", emoji: "💻" },
-    other: { label: "Other", emoji: "🌐" },
+const toneStyles: Record<string, React.CSSProperties> = {
+    professional: {
+        background: "rgba(59,130,246,0.08)",
+        color: "#2563eb",
+        border: "1px solid rgba(59,130,246,0.2)",
+    },
+    friendly: {
+        background: "rgba(16,185,129,0.08)",
+        color: "#059669",
+        border: "1px solid rgba(16,185,129,0.2)",
+    },
+    salesy: {
+        background: "rgba(245,158,11,0.08)",
+        color: "#d97706",
+        border: "1px solid rgba(245,158,11,0.2)",
+    },
 };
 
 export const DomainDetail: FC<DomainDetailProps> = ({
@@ -53,50 +68,52 @@ export const DomainDetail: FC<DomainDetailProps> = ({
         setTimeout(() => setScriptCopied(false), 2000);
     }, [script]);
 
-    const tone = toneLabels[domain.tone] || { label: domain.tone, color: "bg-gray-100 text-gray-600 border-gray-200" };
-    const industry = industryLabels[domain.industryType] || { label: domain.industryType, emoji: "🌐" };
+    const tone = toneStyles[domain.tone];
 
     return (
-        <div className="min-h-screen bg-[rgb(var(--background))]">
-            {/* Top nav */}
-            <div className="bg-[rgb(var(--surface))] border-b border-[rgb(var(--border))] sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="min-h-screen bg-gray-50">
+            {/* Top Bar */}
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
+                <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={onBack}
-                            className="flex items-center gap-2 text-sm font-medium text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))] transition-colors group"
+                            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition"
                         >
-                            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                            <ArrowLeft size={14} />
                             Domains
                         </button>
-                        <span className="text-[rgb(var(--border))]">/</span>
-                        <span className="text-sm font-semibold text-[rgb(var(--foreground))] truncate max-w-[200px]">
+
+                        <span className="text-gray-300">/</span>
+
+                        <span className="text-sm font-semibold text-gray-800 truncate max-w-[220px]">
                             {domain.domainName}
                         </span>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => onEdit(domain)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium border border-[rgb(var(--border))] rounded-xl hover:bg-[rgb(var(--surface-muted))] transition-colors text-[rgb(var(--foreground))]"
+                            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white hover:bg-gray-100 transition"
                         >
                             <Settings size={14} />
                             Edit
                         </button>
+
                         <button
                             onClick={() => onToggle(domain._id)}
-                            className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-all ${domain.botEnabled
-                                    ? "bg-[rgb(var(--surface-muted))] text-[rgb(var(--text-muted))] hover:bg-red-50 hover:text-red-600 border border-[rgb(var(--border))]"
-                                    : "bg-[rgb(var(--primary))] text-white hover:bg-[rgb(var(--primary-hover))] shadow-sm shadow-orange-200"
+                            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl transition ${domain.botEnabled
+                                    ? "border border-gray-200 text-gray-600 bg-white hover:bg-gray-100"
+                                    : "bg-[#f97518] text-white shadow-sm hover:opacity-90"
                                 }`}
                         >
                             <Power size={14} />
                             {domain.botEnabled ? "Disable" : "Enable"}
                         </button>
+
                         <button
                             onClick={() => onDelete(domain._id)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                            className="p-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition"
                         >
                             <Trash2 size={14} />
                         </button>
@@ -104,207 +121,146 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-                {/* Hero card */}
-                <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl overflow-hidden">
-                    {/* Status stripe */}
+            <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+                {/* Hero Card */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex gap-5">
                     <div
-                        className={`h-1.5 ${domain.botEnabled
-                                ? "bg-gradient-to-r from-[rgb(var(--primary))] to-[rgb(var(--primary-light-1))]"
-                                : "bg-[rgb(var(--border))]"
+                        className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold ${domain.botEnabled
+                                ? "bg-gradient-to-br from-[#f97518] to-[#ea5a00] text-white shadow-md"
+                                : "bg-gray-100 text-gray-500 border border-gray-200"
                             }`}
-                    />
-                    <div className="p-6 flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            {/* Avatar */}
-                            <div
-                                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-sm ${domain.botEnabled
-                                        ? "bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--primary-hover))]"
-                                        : "bg-[rgb(var(--surface-muted))] border border-[rgb(var(--border))]"
+                    >
+                        {domain.botName.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">
+                            {domain.botName}
+                        </h1>
+
+                        <div className="flex items-center gap-2 mt-1">
+                            <ExternalLink size={13} className="text-gray-400" />
+                            <a
+                                href={`https://${domain.domainName}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-gray-500 hover:text-[#f97518] transition"
+                            >
+                                {domain.domainName}
+                            </a>
+                        </div>
+
+                        <div className="flex gap-2 mt-4 flex-wrap">
+                            <span
+                                className={`px-2.5 py-1 rounded-full text-xs font-semibold ${domain.botEnabled
+                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                        : "bg-gray-100 text-gray-500 border border-gray-200"
                                     }`}
                             >
-                                {domain.botAvatar ? (
-                                    <img src={domain.botAvatar} alt={domain.botName} className="w-full h-full rounded-2xl object-cover" />
-                                ) : (
-                                    <span className={domain.botEnabled ? "text-white" : "text-[rgb(var(--text-muted))]"}>
-                                        {domain.botName.charAt(0).toUpperCase()}
-                                    </span>
-                                )}
-                            </div>
+                                {domain.botEnabled ? "Active" : "Disabled"}
+                            </span>
 
-                            <div>
-                                <h1 className="text-xl font-bold text-[rgb(var(--foreground))]">{domain.botName}</h1>
-                                <div className="flex items-center gap-1.5 mt-1">
-                                    <ExternalLink size={13} className="text-[rgb(var(--text-muted))]" />
-                                    <a
-                                        href={`https://${domain.domainName}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-sm text-[rgb(var(--text-muted))] hover:text-[rgb(var(--primary))] transition-colors"
-                                    >
-                                        {domain.domainName}
-                                    </a>
-                                </div>
-                                <div className="flex items-center gap-2 mt-2.5">
-                                    <span
-                                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${domain.botEnabled
-                                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                                : "bg-[rgb(var(--surface-muted))] text-[rgb(var(--text-muted))] border-[rgb(var(--border))]"
-                                            }`}
-                                    >
-                                        <span className={`w-1.5 h-1.5 rounded-full ${domain.botEnabled ? "bg-emerald-500" : "bg-gray-400"}`} />
-                                        {domain.botEnabled ? "Active" : "Disabled"}
-                                    </span>
-                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium border capitalize ${tone.color}`}>
-                                        {tone.label}
-                                    </span>
-                                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[rgb(var(--surface-muted))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))]">
-                                        {industry.emoji} {industry.label}
-                                    </span>
-                                </div>
-                            </div>
+                            <span
+                                className="px-2.5 py-1 rounded-full text-xs font-semibold capitalize"
+                                style={
+                                    tone || {
+                                        background: "#f3f4f6",
+                                        color: "#6b7280",
+                                        border: "1px solid #e5e7eb",
+                                    }
+                                }
+                            >
+                                {domain.tone}
+                            </span>
                         </div>
                     </div>
                 </div>
 
+                {/* Info Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Domain Key */}
-                    <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl p-6">
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <Globe size={15} className="text-[rgb(var(--primary))]" />
-                                <h2 className="text-sm font-semibold text-[rgb(var(--foreground))]">Domain Key</h2>
-                            </div>
+                            <h2 className="text-sm font-semibold text-gray-800">
+                                Domain Key
+                            </h2>
+
                             <button
                                 onClick={copyKey}
-                                className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${keyCopied
-                                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                        : "bg-[rgb(var(--surface-muted))] text-[rgb(var(--text-muted))] border-[rgb(var(--border))] hover:border-[rgb(var(--primary))] hover:text-[rgb(var(--primary))]"
+                                className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition ${keyCopied
+                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                        : "border border-gray-200 text-gray-600 hover:bg-gray-100"
                                     }`}
                             >
-                                {keyCopied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
+                                {keyCopied ? <Check size={12} /> : <Copy size={12} />}
+                                {keyCopied ? "Copied" : "Copy"}
                             </button>
                         </div>
-                        <div
-                            onClick={copyKey}
-                            className="cursor-pointer bg-[rgb(var(--surface-muted))] hover:bg-[rgb(var(--background))] rounded-xl px-4 py-3 transition-colors"
-                        >
-                            <code className="text-xs font-mono text-[rgb(var(--text-muted))] break-all leading-relaxed">
-                                {domain.domainKey}
-                            </code>
-                        </div>
+
+                        <code className="block bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs font-mono text-gray-600 break-all">
+                            {domain.domainKey}
+                        </code>
                     </div>
 
-                    {/* Company info */}
-                    <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Building2 size={15} className="text-[rgb(var(--primary))]" />
-                            <h2 className="text-sm font-semibold text-[rgb(var(--foreground))]">Company Description</h2>
-                        </div>
-                        {domain.companyDescription ? (
-                            <p className="text-sm text-[rgb(var(--text-muted))] leading-relaxed">
-                                {domain.companyDescription}
-                            </p>
-                        ) : (
-                            <p className="text-sm text-[rgb(var(--text-muted))] italic">No description provided.</p>
-                        )}
-                    </div>
-
-                    {/* Fallback message */}
-                    <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <MessageSquare size={15} className="text-[rgb(var(--primary))]" />
-                            <h2 className="text-sm font-semibold text-[rgb(var(--foreground))]">Fallback Message</h2>
-                        </div>
-                        <div className="bg-[rgb(var(--surface-muted))] rounded-xl px-4 py-3">
-                            <p className="text-sm text-[rgb(var(--foreground))] leading-relaxed">
-                                {domain.fallbackMessage}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Status overview */}
-                    <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Activity size={15} className="text-[rgb(var(--primary))]" />
-                            <h2 className="text-sm font-semibold text-[rgb(var(--foreground))]">Configuration</h2>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-[rgb(var(--border))]">
-                                <span className="text-xs text-[rgb(var(--text-muted))]">Status</span>
-                                <span className={`text-xs font-medium ${domain.botEnabled ? "text-emerald-600" : "text-gray-400"}`}>
-                                    {domain.botEnabled ? "Active" : "Disabled"}
+                    {/* Company Description */}
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                        <h2 className="text-sm font-semibold text-gray-800 mb-4">
+                            Company Description
+                        </h2>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                            {domain.companyDescription || (
+                                <span className="italic text-gray-400">
+                                    No description provided.
                                 </span>
-                            </div>
-                            <div className="flex items-center justify-between py-2 border-b border-[rgb(var(--border))]">
-                                <span className="text-xs text-[rgb(var(--text-muted))]">Tone</span>
-                                <span className="text-xs font-medium text-[rgb(var(--foreground))] capitalize">{domain.tone}</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-xs text-[rgb(var(--text-muted))]">Industry</span>
-                                <span className="text-xs font-medium text-[rgb(var(--foreground))] capitalize">{domain.industryType}</span>
-                            </div>
-                        </div>
+                            )}
+                        </p>
                     </div>
                 </div>
 
                 {/* Installation Script */}
-                <div className="bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-2xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-[rgb(var(--border))] flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Code2 size={15} className="text-[rgb(var(--primary))]" />
-                            <h2 className="text-sm font-semibold text-[rgb(var(--foreground))]">Installation Script</h2>
-                        </div>
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h2 className="text-sm font-semibold text-gray-800">
+                            Installation Script
+                        </h2>
+
                         <button
                             onClick={copyScript}
                             disabled={!script}
-                            className={`flex items-center gap-1.5 text-xs font-medium px-3.5 py-2 rounded-xl border transition-all ${scriptCopied
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                    : "bg-[rgb(var(--primary))] text-white border-[rgb(var(--primary))] hover:bg-[rgb(var(--primary-hover))] shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition ${scriptCopied
+                                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                    : "bg-[#f97518] text-white hover:opacity-90"
                                 }`}
                         >
-                            {scriptCopied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy Script</>}
+                            {scriptCopied ? <Check size={12} /> : <Copy size={12} />}
+                            {scriptCopied ? "Copied!" : "Copy Script"}
                         </button>
                     </div>
 
-                    {/* How to install */}
-                    <div className="px-6 py-4 bg-[rgb(var(--primary-light-3))] border-b border-[rgb(var(--primary-light-2))]">
-                        <p className="text-xs font-semibold text-[rgb(var(--primary))] mb-2">How to install</p>
-                        <ol className="text-xs text-[rgb(var(--foreground))] space-y-1 list-decimal list-inside">
-                            <li>Copy the script below</li>
-                            <li>Paste it into your website's HTML just before the closing <code className="font-mono bg-white/60 px-1 rounded">&lt;/body&gt;</code> tag</li>
-                            <li>The chatbot widget will appear in the bottom-right corner of your site</li>
-                        </ol>
-                    </div>
-
-                    {/* Script block */}
                     <div className="p-6">
                         {script ? (
-                            <div
-                                onClick={copyScript}
-                                className="cursor-pointer group bg-[#0d1117] rounded-xl overflow-x-auto transition-all hover:ring-2 hover:ring-[rgb(var(--primary))]/30"
-                            >
-                                <pre className="p-5 text-xs font-mono text-[#e6edf3] leading-relaxed whitespace-pre-wrap break-all">
-                                    <code>{script}</code>
-                                </pre>
-                            </div>
+                            <pre className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-xs font-mono text-gray-700 overflow-x-auto whitespace-pre-wrap break-all">
+                                {script}
+                            </pre>
                         ) : (
-                            <div className="bg-[rgb(var(--surface-muted))] rounded-xl p-6 flex items-center justify-center">
-                                <p className="text-sm text-[rgb(var(--text-muted))]">Loading script…</p>
+                            <div className="p-6 text-center text-gray-400 text-sm">
+                                Loading script…
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Danger zone */}
-                <div className="bg-[rgb(var(--surface))] border border-red-200 rounded-2xl p-6">
-                    <h2 className="text-sm font-semibold text-red-600 mb-1">Danger Zone</h2>
-                    <p className="text-xs text-[rgb(var(--text-muted))] mb-4">
-                        Deleting this domain is irreversible. All chatbot data, conversations, and configurations will be permanently removed.
+                {/* Danger Zone */}
+                <div className="bg-white rounded-2xl border border-red-200 p-6">
+                    <h2 className="text-sm font-semibold text-red-600 mb-2">
+                        Danger Zone
+                    </h2>
+                    <p className="text-xs text-gray-500 mb-4">
+                        Deleting this domain is irreversible.
                     </p>
                     <button
                         onClick={() => onDelete(domain._id)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition"
                     >
                         <Trash2 size={14} />
                         Delete this domain

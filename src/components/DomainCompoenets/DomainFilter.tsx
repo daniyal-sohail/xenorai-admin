@@ -27,63 +27,70 @@ const DomainFiltersComponent: FC<DomainFiltersProps> = ({ filters, onFilterChang
         [filters, onFilterChange]
     );
 
+    const statusOptions: { val: "enabled" | "disabled" | undefined; label: string }[] = [
+        { val: undefined, label: "All" },
+        { val: "enabled", label: "Active" },
+        { val: "disabled", label: "Inactive" },
+    ];
+
     return (
         <div className="flex items-center gap-3 mb-6">
             {/* Search */}
             <div className="relative flex-1 max-w-sm">
                 <Search
-                    size={15}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--text-muted))] pointer-events-none"
+                    size={14}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"
                 />
+
                 <input
                     type="text"
                     placeholder="Search domains or bots…"
                     value={filters.search || ""}
                     onChange={handleSearch}
-                    className="w-full pl-10 pr-9 py-2.5 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl text-sm text-[rgb(var(--foreground))] placeholder:text-[rgb(var(--text-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))]/25 focus:border-[rgb(var(--primary))] transition-all"
+                    className="w-full pl-10 pr-9 py-2.5 rounded-xl text-sm 
+                   bg-white border border-gray-200 text-gray-800
+                   focus:outline-none focus:ring-2 focus:ring-orange-500/20 
+                   focus:border-orange-500 transition-all"
                 />
+
                 {filters.search && (
                     <button
                         onClick={clearSearch}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 
+                     text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={14} />
+                        <X size={13} />
                     </button>
                 )}
             </div>
 
-            {/* Status toggle pills */}
-            <div className="flex items-center gap-1 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl p-1">
-                <button
-                    onClick={() => setStatus(undefined)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${!filters.status
-                            ? "bg-[rgb(var(--foreground))] text-[rgb(var(--surface))] shadow-sm"
-                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
-                        }`}
-                >
-                    All
-                </button>
-                <button
-                    onClick={() => setStatus("enabled")}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${filters.status === "enabled"
-                            ? "bg-emerald-500 text-white shadow-sm"
-                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
-                        }`}
-                >
-                    Active
-                </button>
-                <button
-                    onClick={() => setStatus("disabled")}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${filters.status === "disabled"
-                            ? "bg-[rgb(var(--surface-muted))] text-[rgb(var(--foreground))] shadow-sm border border-[rgb(var(--border))]"
-                            : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--foreground))]"
-                        }`}
-                >
-                    Inactive
-                </button>
+            {/* Status Pills */}
+            <div className="flex items-center gap-1 rounded-xl p-1 bg-gray-100 border border-gray-200">
+                {statusOptions.map(({ val, label }) => {
+                    const isActive = filters.status === val;
+
+                    return (
+                        <button
+                            key={String(val)}
+                            onClick={() => setStatus(val)}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all
+              ${isActive
+                                    ? val === "enabled"
+                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                        : val === "disabled"
+                                            ? "bg-gray-200 text-gray-700 border border-gray-300"
+                                            : "bg-orange-500 text-white shadow-sm"
+                                    : "text-gray-500 hover:text-gray-700 border border-transparent"
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
+
 };
 
 export const DomainFilters = memo(DomainFiltersComponent);

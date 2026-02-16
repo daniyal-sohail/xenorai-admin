@@ -150,55 +150,50 @@ export default function ProductsPage() {
     const canCreateProduct = products.filter((p) => p.isActive).length < 3;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20">
-            {/* Hero Header */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 border-b-4 border-indigo-700">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAgMi4yMS0xLjc5IDQtNCA0cy00LTEuNzktNC00IDEuNzktNCA0LTQgNCAxLjc5IDQgNHptLTQgMjhjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00em0yMC0yMGMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCA0LTEuNzkgNC00LTEuNzktNC00LTR6bTAgMjBjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00ek0xMiAyNGMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCA0LTEuNzkgNC00LTEuNzktNC00LTR6bTAgMjBjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
-
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="flex items-center justify-between flex-wrap gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
-                                <Sparkles className="text-white" size={32} />
-                            </div>
-                            <div>
-                                <h1 className="text-4xl font-black text-white mb-1">
-                                    Product Catalog
-                                </h1>
-                                <p className="text-indigo-100 text-lg">
-                                    Manage products for your AI chatbot
-                                </p>
-                            </div>
+        <div className="min-h-screen bg-[rgb(var(--background))]">
+            {/* Header */}
+            <div className="bg-[rgb(var(--surface))] border-b border-[rgb(var(--border))]">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--primary-hover))] flex items-center justify-center shadow-sm shadow-orange-200">
+                            <Sparkles size={16} className="text-white" />
                         </div>
-                        <button
-                            onClick={() => setCreateModalOpen(true)}
-                            disabled={!selectedDomainId || !canCreateProduct}
-                            className="px-8 py-4 bg-white text-indigo-600 rounded-2xl hover:bg-indigo-50 transition-all duration-200 font-bold flex items-center gap-3 shadow-2xl hover:shadow-indigo-900/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                            title={
-                                !canCreateProduct
-                                    ? "Free plan limited to 3 active products"
-                                    : ""
-                            }
-                        >
-                            <Plus size={24} />
-                            Add Product
-                        </button>
+                        <div>
+                            <h1 className="text-xl font-bold text-[rgb(var(--foreground))] leading-tight">Products</h1>
+                            {!loading && (
+                                <p className="text-xs text-[rgb(var(--text-muted))]">
+                                    {products.length} product{products.length !== 1 ? "s" : ""} configured
+                                </p>
+                            )}
+                        </div>
                     </div>
-
-                    {!canCreateProduct && selectedDomainId && (
-                        <div className="mt-6 bg-yellow-400/20 backdrop-blur-sm border-2 border-yellow-400 rounded-2xl p-4">
-                            <p className="text-sm text-white font-semibold">
-                                ⚠️ <strong>Product Limit Reached:</strong> Free plan is limited to 3
-                                active products. Upgrade to add more.
+                    <button
+                        onClick={() => setCreateModalOpen(true)}
+                        disabled={!selectedDomainId || !canCreateProduct}
+                        className="btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-orange-200/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        title={
+                            !canCreateProduct
+                                ? "Free plan limited to 3 active products"
+                                : ""
+                        }
+                    >
+                        <Plus size={15} />
+                        New Product
+                    </button>
+                </div>
+                {!canCreateProduct && selectedDomainId && (
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                            <p className="text-sm text-yellow-800 font-medium">
+                                ⚠️ <strong>Product Limit Reached:</strong> Free plan is limited to 3 active products. Upgrade to add more.
                             </p>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Content */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Filters with Stats */}
                 <ProductFilters
                     domains={domains}

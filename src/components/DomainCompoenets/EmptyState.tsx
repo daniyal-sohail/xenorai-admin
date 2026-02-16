@@ -9,24 +9,38 @@ interface EmptyStateProps {
 
 export const EmptyState: FC<EmptyStateProps> = ({ onCreateClick }) => {
     return (
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mb-6">
-                <Globe className="text-indigo-600" size={40} />
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            {/* Glow orb */}
+            <div
+                className="flex items-center justify-center mb-6"
+                style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle, rgba(249,117,24,0.12) 0%, transparent 70%)",
+                    border: "1px solid rgba(249,117,24,0.15)",
+                    boxShadow: "0 0 40px rgba(249,117,24,0.12)",
+                }}
+            >
+                <Globe size={40} style={{ color: "#f97518" }} />
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <h3 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: "#f0f0f5" }}>
                 No Domains Yet
             </h3>
-
-            <p className="text-gray-600 text-center max-w-md mb-8">
-                Get started by creating your first domain. Add a chatbot to your website in just a few clicks.
+            <p className="text-sm max-w-xs leading-relaxed mb-8" style={{ color: "#6b6b80" }}>
+                Create your first domain to start deploying intelligent chatbots on your websites.
             </p>
 
             <button
                 onClick={onCreateClick}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2 shadow-lg shadow-indigo-500/30"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
+                style={{
+                    background: "linear-gradient(135deg, #f97518, #ea5a00)",
+                    boxShadow: "0 4px 24px rgba(249,117,24,0.3)",
+                }}
             >
-                <Plus size={20} />
+                <Plus size={16} />
                 Create Your First Domain
             </button>
         </div>

@@ -1,61 +1,61 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
 export default function PricingCard() {
     const plans = [
         {
-            name: 'Starter',
-            price: '$29',
+            name: 'Free',
+            price: '$0',
             period: '/ month',
-            description: 'For solo makers & small teams',
-            buttonText: 'Get Started Now',
+            description: 'Test XenorAi with a single domain',
+            buttonText: 'Coming Soon',
             buttonStyle: 'bg-white text-[#F97518] hover:bg-orange-50',
             highlighted: false,
             badge: null,
             features: [
-                '1 AI Agent (basic logic)',
-                'Unlimited Layout Generator',
-                'Embed widgets & internal tools',
-                'Auto-optimized landing pages',
-                '500 site visits/month',
-                'Email support'
+                '1 domain',
+                '3 products per domain',
+                '20 emails per month',
+                '100 chatbot conversations/month',
+                'Limited voice & 1 language',
+                'Basic email support'
             ]
         },
         {
             name: 'Pro',
-            price: '$299',
+            price: '$29',
             period: '/ month',
-            description: 'Launch with advanced workflows',
-            buttonText: 'Get Started Now',
+            description: 'Perfect for small businesses',
+            buttonText: 'Coming Soon',
             buttonStyle: 'bg-[#F97518] text-white hover:bg-[#e86b13] shadow-[0_8px_16px_rgba(251,146,60,0.3)]',
             highlighted: true,
-            badge: 'Save 20%',
+            badge: 'Most Popular',
             features: [
-                'Everything in Starter',
-                'Unlimited AI agents (advanced)',
-                'Builder with smart templates',
-                'Custom domain support',
-                '10,000 site visits/month',
-                'Priority support'
+                'Up to 5 domains',
+                '5 products per domain',
+                '100 emails per month',
+                '1000 chatbot conversations/month',
+                'Voice & 3 languages',
+                'Email support'
             ]
         },
         {
-            name: 'Agency',
-            price: '$899',
-            period: '/ month',
-            description: 'Full power for teams managing',
-            buttonText: 'Get Started Now',
-            buttonStyle: 'bg-white  text-[#F97518] hover:bg-orange-50',
+            name: 'Enterprise',
+            price: 'Contact',
+            period: '',
+            description: 'Unlimited power for agencies & large businesses',
+            buttonText: 'Coming Soon',
+            buttonStyle: 'bg-white text-[#F97518] hover:bg-orange-50',
             highlighted: false,
             badge: null,
             features: [
-                'Everything in Pro',
-                'Unlimited projects workspaces',
-                'Team collaboration (10+ users)',
-                'White-labeling options',
-                'Analytics dashboard',
-                'Dedicated support manager'
+                'Unlimited domains',
+                'Unlimited products per domain',
+                'Unlimited emails per month',
+                'Unlimited chatbot conversations',
+                'Voice & unlimited languages',
+                'Custom branding / white-label'
             ]
         }
     ];
@@ -66,24 +66,44 @@ export default function PricingCard() {
 
                 <div className="text-center mb-20">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-300 rounded-full  shadow-sm mb-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                            <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                        <span className="text-gray-700 font-medium text-[15px]">How it Works</span>
+                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 
+    border border-gray-200 
+    bg-white 
+    rounded-full 
+    shadow-sm 
+    mb-2 
+    group 
+    hover:shadow-md 
+    hover:border-orange-300 
+    transition-all duration-300">
+
+                        <CreditCard
+                            className="w-5 h-5 text-orange-500 
+        transition-all duration-300 
+        group-hover:scale-110"
+                        />
+
+                        <span className="text-gray-700 font-medium text-[15px] 
+        transition-colors duration-300 
+        group-hover:text-black">
+                            Pricing Plans
+                        </span>
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight">
-                        How it Works
+                    <h2 className="text-[48px] font-[400] tracking-[-3.5px] text-[#1e0d01] mb-4 leading-tight text-center">
+                        Simple, Transparent Pricing
                     </h2>
 
                     {/* Subtitle */}
-                    <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center ">
+                    <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 
+    text-[15px] sm:text-[16px] lg:text-[18px] 
+    font-[500] leading-relaxed 
+    text-[#1e0d0199] text-center">
 
-                        Pre-optimized templates and AI tools that help founders launch bold, client winning sites without the usual grind.
+                        Choose a plan that fits your stage — whether you're just starting or ready to scale.
                     </p>
+
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {plans.map((plan, index) => (
@@ -138,7 +158,7 @@ export default function PricingCard() {
                                         href="mailto:skillhiveclub@ucp.edu.pk"
                                         className={`group  ${plan.buttonStyle}  h-10 rounded-full py-5 px-2 cursor-pointer shadow-lg flex justify-center items-center  hover:shadow-xl w-full transition-all duration-300 no-underline`}
                                     >
-                                        <span className="mr-2">Let's Collab</span>
+                                        <span className="mr-2">{plan.buttonText}</span>
                                         <ArrowRight className="w-4 h-4 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
                                     </Link>
                                 </div>

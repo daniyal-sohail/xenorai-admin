@@ -204,32 +204,7 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    {/* User Profile */}
-                    {user && (
-                        <div className="flex items-center gap-3 bg-[rgb(var(--surface))] border border-[rgb(var(--border))] rounded-xl px-4 py-3 shadow-sm">
-                            {user.profileImage ? (
-                                <img
-                                    src={user.profileImage}
-                                    alt={user.fullName}
-                                    className="w-10 h-10 rounded-full object-cover ring-2 ring-[rgb(var(--border))]"
-                                />
-                            ) : (
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--primary-hover))] flex items-center justify-center shadow-sm">
-                                    <span className="text-sm font-bold text-white">
-                                        {getUserInitials(user.fullName)}
-                                    </span>
-                                </div>
-                            )}
-                            <div className="hidden sm:block">
-                                <p className="text-sm font-semibold text-[rgb(var(--foreground))]">
-                                    {user.fullName}
-                                </p>
-                                <p className="text-xs text-[rgb(var(--text-muted))]">
-                                    {user.email}
-                                </p>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
 
                 {/* Stats Grid */}

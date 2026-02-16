@@ -2,46 +2,59 @@
 
 import { FC } from "react";
 
-export const DomainSkeleton: FC = () => {
-    return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
-            {/* Status Badge Skeleton */}
-            <div className="flex justify-end mb-4">
-                <div className="h-6 w-20 bg-gray-200 rounded-full" />
-            </div>
+const shimmer: React.CSSProperties = {
+    background:
+        "linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)",
+    backgroundSize: "200% 100%",
+    animation: "rowShimmer 1.4s infinite",
+    borderRadius: 6,
+};
 
-            {/* Avatar & Name Skeleton */}
-            <div className="flex items-start gap-4 mb-4">
-                <div className="w-14 h-14 rounded-full bg-gray-200" />
-                <div className="flex-1 space-y-2">
-                    <div className="h-5 bg-gray-200 rounded w-32" />
-                    <div className="h-4 bg-gray-200 rounded w-48" />
+export const DomainRowSkeleton: FC = () => {
+    return (
+        <>
+            <style>{`
+        @keyframes rowShimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position:  200% 0; }
+        }
+      `}</style>
+
+            <div className="flex items-center px-6 py-4 border-b border-gray-200 bg-white">
+                {/* Bot Avatar */}
+                <div style={{ ...shimmer, width: 40, height: 40, borderRadius: 10 }} />
+
+                {/* Bot + Domain Info */}
+                <div className="ml-4 flex-1 space-y-2">
+                    <div style={{ ...shimmer, width: "35%", height: 12 }} />
+                    <div style={{ ...shimmer, width: "50%", height: 10 }} />
+                </div>
+
+                {/* Tone */}
+                <div style={{ ...shimmer, width: 70, height: 24, borderRadius: 999 }} />
+
+                {/* Status */}
+                <div className="ml-6">
+                    <div style={{ ...shimmer, width: 80, height: 24, borderRadius: 999 }} />
+                </div>
+
+                {/* Actions */}
+                <div className="ml-8 flex gap-3">
+                    <div style={{ ...shimmer, width: 28, height: 28, borderRadius: 8 }} />
+                    <div style={{ ...shimmer, width: 28, height: 28, borderRadius: 8 }} />
                 </div>
             </div>
-
-            {/* Domain Key Skeleton */}
-            <div className="space-y-2 mb-4">
-                <div className="h-3 bg-gray-200 rounded w-24" />
-                <div className="h-10 bg-gray-100 rounded-lg" />
-            </div>
-
-            {/* Metadata Skeleton */}
-            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
-                <div className="h-6 bg-gray-200 rounded w-20" />
-                <div className="h-6 bg-gray-200 rounded w-20" />
-            </div>
-
-            {/* Button Skeleton */}
-            <div className="h-10 bg-gray-200 rounded-lg" />
-        </div>
+        </>
     );
 };
 
-export const DomainSkeletonGrid: FC<{ count?: number }> = ({ count = 6 }) => {
+export const DomainSkeletonGrid: FC<{ rows?: number }> = ({
+    rows = 6,
+}) => {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: count }).map((_, i) => (
-                <DomainSkeleton key={i} />
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            {Array.from({ length: rows }).map((_, i) => (
+                <DomainRowSkeleton key={i} />
             ))}
         </div>
     );

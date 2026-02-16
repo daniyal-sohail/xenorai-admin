@@ -9,7 +9,7 @@ const Page = () => {
             <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row sm:p-0">
                 {/* Login form */}
                 <SignInForm />
-                <MovingCards />
+                {/* <MovingCards /> */}
             </div>
         </div>
     );

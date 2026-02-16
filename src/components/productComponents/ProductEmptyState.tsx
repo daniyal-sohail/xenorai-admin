@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, SlidersHorizontal } from "lucide-react";
 
 interface ProductEmptyStateProps {
     hasFilters: boolean;
@@ -15,44 +15,50 @@ export const ProductEmptyState: FC<ProductEmptyStateProps> = ({
     onCreateClick,
 }) => {
     return (
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mb-6">
-                <Package className="text-indigo-600" size={40} />
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+                style={{
+                    background: "rgba(249,117,24,0.08)",
+                    border: "1px solid rgba(249,117,24,0.15)",
+                    boxShadow: "0 0 24px rgba(249,117,24,0.1)",
+                }}
+            >
+                {hasFilters ? (
+                    <SlidersHorizontal size={28} style={{ color: "#f97518" }} />
+                ) : (
+                    <Package size={28} style={{ color: "#f97518" }} />
+                )}
             </div>
 
+            <h3 className="text-lg font-bold text-gray-900 mb-1.5 tracking-tight">
+                {hasFilters ? "No Products Found" : "No Products Yet"}
+            </h3>
+
+            <p className="text-sm text-gray-500 max-w-xs leading-relaxed mb-7">
+                {hasFilters
+                    ? "No products match your current filters. Try adjusting your search or clear the filters."
+                    : "Get started by adding your first product. Your chatbot can recommend products to visitors."}
+            </p>
+
             {hasFilters ? (
-                <>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                        No Products Found
-                    </h3>
-                    <p className="text-gray-600 text-center max-w-md mb-8">
-                        No products match your current filters. Try adjusting your search
-                        criteria or clear the filters.
-                    </p>
-                    <button
-                        onClick={onClearFilters}
-                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-                    >
-                        Clear Filters
-                    </button>
-                </>
+                <button
+                    onClick={onClearFilters}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)", boxShadow: "0 4px 16px rgba(249,117,24,0.25)" }}
+                >
+                    <SlidersHorizontal size={14} />
+                    Clear Filters
+                </button>
             ) : (
-                <>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                        No Products Yet
-                    </h3>
-                    <p className="text-gray-600 text-center max-w-md mb-8">
-                        Get started by adding your first product. Your chatbot can recommend
-                        products to visitors based on their interests.
-                    </p>
-                    <button
-                        onClick={onCreateClick}
-                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2 shadow-lg shadow-indigo-500/30"
-                    >
-                        <Plus size={20} />
-                        Add Your First Product
-                    </button>
-                </>
+                <button
+                    onClick={onCreateClick}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
+                    style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)", boxShadow: "0 4px 16px rgba(249,117,24,0.25)" }}
+                >
+                    <Plus size={15} />
+                    Add Your First Product
+                </button>
             )}
         </div>
     );

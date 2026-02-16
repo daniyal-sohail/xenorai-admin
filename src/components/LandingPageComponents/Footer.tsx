@@ -11,9 +11,11 @@ import Image from "next/image";
 const Footer = () => {
     return (
         <footer className="w-full">
-            <div className="max-w-7xl mx-auto px-6 py-10 md:py-20">
+
+            <div className="max-w-7xl mx-auto px-6 py-6 md:py-10 ">
+
                 {/* Main Footer Content */}
-                <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 mb-16 max-w-full">
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 mb-2 max-w-full">
 
                     {/* Brand Section */}
                     {/* Brand Section */}
@@ -113,12 +115,10 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Footer Bottom */}
-                <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="absolute inset-0 pointer-events-none z-0"></div>
 
-                    {/* Decorative Background Shape */}
-                    <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-500 rounded-full opacity-15 blur-3xl pointer-events-none z-0"></div>
+                {/* Footer Bottom */}
+                <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden">
+
                     <p className="text-gray-500 text-sm text-center md:text-left">
                         © 2025 Alwork. All rights reserved.
                     </p>

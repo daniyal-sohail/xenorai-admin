@@ -82,7 +82,9 @@ const Navbar: React.FC = () => {
                         {/* CTA Button */}
                         <div className="flex justify-center items-center">
                             <Link
-                                href="mailto:skillhiveclub@ucp.edu.pk"
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSeA_zrbHzmvBLsLmdwMrNSbWxBSC_m72YVM4Qu6Xehk4lMw3Q/viewform?usp=publish-editor"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group bg-[#F97518] text-white h-10 w-36 rounded-full py-2 px-2 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 no-underline"
                             >
                                 <span className="mr-2">Join Wishlist</span>
@@ -148,11 +150,13 @@ const Navbar: React.FC = () => {
                         {/* Mobile CTA */}
                         <div className="p-4 border-t border-gray-100 mt-2">
                             <Link
-                                href="mailto:skillhiveclub@ucp.edu.pk"
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSeA_zrbHzmvBLsLmdwMrNSbWxBSC_m72YVM4Qu6Xehk4lMw3Q/viewform?usp=publish-editor"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group w-full bg-[#F97518] text-white py-3 px-4 rounded-full font-medium hover:bg-[#e86b13] transition-all duration-300 flex justify-center items-center shadow-lg no-underline"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                <span className="mr-2">Let's Collab</span>
+                                <span className="mr-2">Join Wishlist</span>
                                 <ArrowRight className="w-4 h-4 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
                             </Link>
                         </div>

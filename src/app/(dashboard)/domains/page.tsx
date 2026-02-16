@@ -157,7 +157,7 @@ export default function DashboardPage() {
                 )}
 
                 {/* Loading */}
-                {loading && <DomainSkeletonGrid count={6} />}
+                {loading && <DomainSkeletonGrid rows={6} />}
 
                 {/* Empty – no domains */}
                 {!loading && domains.length === 0 && (

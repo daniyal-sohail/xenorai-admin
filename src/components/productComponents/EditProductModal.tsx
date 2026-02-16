@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState, useCallback, useEffect, useRef } from "react";
-import { X, Upload, Edit3 } from "lucide-react";
+import { X, Save, Upload } from "lucide-react";
 import { IProduct, ProductFormData } from "./ProductTypes";
 
 interface EditProductModalProps {
@@ -10,6 +10,14 @@ interface EditProductModalProps {
     onClose: () => void;
     onSubmit: (id: string, data: Partial<ProductFormData>) => Promise<void>;
 }
+
+const labelCls = "block text-[10px] font-bold uppercase tracking-widest mb-1.5 text-gray-500";
+
+const inputCls =
+    "w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all focus:outline-none bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)] hover:border-gray-300";
+
+const errorInputCls =
+    "w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all focus:outline-none bg-red-50 border border-red-300 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100";
 
 export const EditProductModal: FC<EditProductModalProps> = ({
     isOpen,
@@ -20,7 +28,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({
     const [formData, setFormData] = useState<Partial<ProductFormData>>({});
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -40,13 +48,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({
     const handleChange = useCallback(
         (field: keyof ProductFormData, value: any) => {
             setFormData((prev) => ({ ...prev, [field]: value }));
-            if (errors[field]) {
-                setErrors((prev) => {
-                    const newErrors = { ...prev };
-                    delete newErrors[field];
-                    return newErrors;
-                });
-            }
+            if (errors[field]) setErrors((prev) => { const e = { ...prev }; delete e[field]; return e; });
         },
         [errors]
     );
@@ -54,31 +56,13 @@ export const EditProductModal: FC<EditProductModalProps> = ({
     const handleImageChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const file = e.target.files?.[0];
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    setErrors((prev) => ({
-                        ...prev,
-                        image: "Image size must be less than 5MB",
-                    }));
-                    return;
-                }
-
-                if (!file.type.startsWith("image/")) {
-                    setErrors((prev) => ({
-                        ...prev,
-                        image: "Please upload a valid image file",
-                    }));
-                    return;
-                }
-
-                handleChange("image", file);
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImagePreview(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { setErrors((p) => ({ ...p, image: "Image must be less than 5MB" })); return; }
+            if (!file.type.startsWith("image/")) { setErrors((p) => ({ ...p, image: "Please upload a valid image file" })); return; }
+            handleChange("image", file);
+            const reader = new FileReader();
+            reader.onloadend = () => setImagePreview(reader.result as string);
+            reader.readAsDataURL(file);
         },
         [handleChange]
     );
@@ -86,36 +70,26 @@ export const EditProductModal: FC<EditProductModalProps> = ({
     const removeImage = useCallback(() => {
         setFormData((prev) => ({ ...prev, image: null }));
         setImagePreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }, []);
 
-    const validateForm = useCallback(() => {
-        const newErrors: { [key: string]: string } = {};
-
-        if (formData.name && !formData.name.trim()) {
-            newErrors.name = "Product name cannot be empty";
-        }
-
-        if (formData.price !== undefined && formData.price <= 0) {
-            newErrors.price = "Price must be greater than 0";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+    const validate = useCallback(() => {
+        const e: Record<string, string> = {};
+        if (formData.name !== undefined && !formData.name.trim()) e.name = "Product name cannot be empty";
+        if (formData.price !== undefined && formData.price <= 0) e.price = "Price must be greater than 0";
+        setErrors(e);
+        return Object.keys(e).length === 0;
     }, [formData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!product || !validateForm()) return;
-
+        if (!product || !validate()) return;
         setIsSubmitting(true);
         try {
             await onSubmit(product._id, formData);
             onClose();
-        } catch (error) {
-            // Error handled by parent
+        } catch {
+            // handled by parent
         } finally {
             setIsSubmitting(false);
         }
@@ -124,190 +98,174 @@ export const EditProductModal: FC<EditProductModalProps> = ({
     if (!isOpen || !product) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-                {/* Gradient Header */}
-                <div className="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-8 py-6">
-                    <div className="absolute inset-0 bg-black/10"></div>
-                    <div className="relative flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                <Edit3 className="text-white" size={24} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">Edit Product</h2>
-                                <p className="text-emerald-100 text-sm">Update product details</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="w-10 h-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl transition-all flex items-center justify-center"
+        <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(6px)" }}
+        >
+            <div
+                className="w-full sm:rounded-2xl sm:max-w-xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden bg-white"
+                style={{ border: "1px solid #e5e7eb", boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)" }}
+            >
+                {/* Top orange line */}
+                <div style={{ background: "linear-gradient(90deg, transparent, #f97518, transparent)", height: 2, flexShrink: 0 }} />
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 border-b border-gray-100 sticky top-0 bg-white z-10">
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center"
+                            style={{ background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.2)" }}
                         >
-                            <X size={20} className="text-white" />
-                        </button>
+                            <Save size={14} style={{ color: "#f97518" }} />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-bold tracking-tight text-gray-900">Edit Product</h2>
+                            <p className="text-[11px] text-gray-500 truncate max-w-[200px]">{product.name}</p>
+                        </div>
                     </div>
+                    <button
+                        onClick={onClose}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 transition-all"
+                    >
+                        <X size={13} />
+                    </button>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-100px)]">
-                    {/* Image Upload */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="overflow-y-auto flex-1 px-6 py-5 space-y-5"
+                    style={{ scrollbarWidth: "thin", scrollbarColor: "#e5e7eb transparent" }}
+                >
+                    {/* Image upload */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-3">
-                            Product Image
-                        </label>
+                        <label className={labelCls}>Product Image <span className="normal-case font-normal text-gray-400">(optional)</span></label>
                         {imagePreview ? (
-                            <div className="relative group">
-                                <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="w-full h-56 object-cover rounded-2xl border-4 border-emerald-100"
-                                />
+                            <div className="relative rounded-xl overflow-hidden border border-gray-200" style={{ height: 180 }}>
+                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
                                     onClick={removeImage}
-                                    className="absolute top-3 right-3 w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all flex items-center justify-center shadow-lg"
+                                    className="absolute top-2.5 right-2.5 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center shadow transition-colors"
                                 >
-                                    <X size={18} />
+                                    <X size={14} />
                                 </button>
                             </div>
                         ) : (
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className="group border-3 border-dashed border-emerald-200 rounded-2xl p-12 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-all"
+                                className="group border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#f97518] hover:bg-orange-50/40 transition-all"
                             >
-                                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <Upload className="text-white" size={32} />
+                                <div
+                                    className="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                                    style={{ background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)" }}
+                                >
+                                    <Upload size={20} style={{ color: "#f97518" }} />
                                 </div>
-                                <p className="text-base font-semibold text-gray-700 mb-1">
-                                    Click to upload new image
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    PNG, JPG up to 5MB
-                                </p>
+                                <p className="text-sm font-semibold text-gray-700 mb-0.5">Click to upload new image</p>
+                                <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
                             </div>
                         )}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="hidden"
-                        />
-                        {errors.image && (
-                            <p className="text-xs text-red-600 mt-2 font-medium">{errors.image}</p>
-                        )}
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                        {errors.image && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.image}</p>}
                     </div>
 
-                    {/* Product Name */}
+                    {/* Product name */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">
-                            Product Name
-                        </label>
+                        <label className={labelCls}>Product Name</label>
                         <input
                             type="text"
                             placeholder="e.g., Premium Wireless Headphones"
                             value={formData.name || ""}
                             onChange={(e) => handleChange("name", e.target.value)}
-                            className={`w-full px-5 py-3.5 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all font-medium ${errors.name
-                                    ? "border-red-500 focus:border-red-500 focus:ring-red-100"
-                                    : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-100"
-                                }`}
+                            className={errors.name ? errorInputCls : inputCls}
                         />
-                        {errors.name && (
-                            <p className="text-xs text-red-600 mt-2 font-medium">{errors.name}</p>
-                        )}
+                        {errors.name && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.name}</p>}
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">
-                            Description
-                        </label>
+                        <label className={labelCls}>Description <span className="normal-case font-normal text-gray-400">(optional)</span></label>
                         <textarea
-                            rows={4}
-                            placeholder="Describe your product features and benefits..."
+                            rows={3}
+                            placeholder="Describe your product features and benefits…"
                             value={formData.description || ""}
                             onChange={(e) => handleChange("description", e.target.value)}
-                            className="w-full px-5 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all resize-none"
+                            className={inputCls + " resize-none"}
                         />
                     </div>
 
-                    {/* Price & Category Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Price + Category */}
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-bold text-gray-900 mb-2">
-                                Price
-                            </label>
+                            <label className={labelCls}>Price</label>
                             <div className="relative">
-                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
-                                    $
-                                </span>
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">$</span>
                                 <input
                                     type="number"
                                     min="0"
                                     step="0.01"
                                     placeholder="99.99"
                                     value={formData.price || ""}
-                                    onChange={(e) =>
-                                        handleChange("price", parseFloat(e.target.value) || 0)
-                                    }
-                                    className={`w-full pl-10 pr-5 py-3.5 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all font-medium ${errors.price
-                                            ? "border-red-500 focus:border-red-500 focus:ring-red-100"
-                                            : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-100"
-                                        }`}
+                                    onChange={(e) => handleChange("price", parseFloat(e.target.value) || 0)}
+                                    className={(errors.price ? errorInputCls : inputCls) + " pl-8"}
                                 />
                             </div>
-                            {errors.price && (
-                                <p className="text-xs text-red-600 mt-2 font-medium">{errors.price}</p>
-                            )}
+                            {errors.price && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.price}</p>}
                         </div>
-
                         <div>
-                            <label className="block text-sm font-bold text-gray-900 mb-2">
-                                Category
-                            </label>
+                            <label className={labelCls}>Category</label>
                             <input
                                 type="text"
                                 placeholder="e.g., Electronics"
                                 value={formData.category || ""}
                                 onChange={(e) => handleChange("category", e.target.value)}
-                                className="w-full px-5 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all font-medium"
+                                className={inputCls}
                             />
                         </div>
                     </div>
 
-                    {/* Checkout Link */}
+                    {/* Checkout link */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">
-                            Checkout Link
-                        </label>
+                        <label className={labelCls}>Checkout Link <span className="normal-case font-normal text-gray-400">(optional)</span></label>
                         <input
                             type="url"
-                            placeholder="https://example.com/product/checkout"
+                            placeholder="https://example.com/checkout"
                             value={formData.checkoutLink || ""}
                             onChange={(e) => handleChange("checkoutLink", e.target.value)}
-                            className="w-full px-5 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all"
+                            className={inputCls}
                         />
                     </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-4 pt-4">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 px-6 py-4 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-bold text-gray-700"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                        >
-                            {isSubmitting ? "Saving..." : "Save Changes"}
-                        </button>
-                    </div>
                 </form>
+
+                {/* Footer */}
+                <div className="flex items-center gap-3 px-6 py-4 flex-shrink-0 border-t border-gray-100 bg-white">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-5 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-all hover:opacity-90"
+                        style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)", boxShadow: "0 4px 16px rgba(249,117,24,0.25)" }}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Saving…
+                            </>
+                        ) : (
+                            <>
+                                <Save size={14} />
+                                Save Changes
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );

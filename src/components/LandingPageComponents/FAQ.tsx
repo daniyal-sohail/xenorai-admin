@@ -1,5 +1,6 @@
 'use client';
 
+import { HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 
 const FAQ = () => {
@@ -45,12 +46,28 @@ const FAQ = () => {
                         {/* Badge */}
                         <div className=" mb-20">
                             {/* Badge */}
-                            <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-300 rounded-full  shadow-sm mb-2">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                                <span className="text-gray-700 font-medium text-[15px]">FAQ</span>
+                            <div className="inline-flex items-center gap-2.5 px-5 py-1.5 
+    border border-gray-200 
+    bg-white 
+    rounded-full 
+    shadow-sm 
+    mb-2 
+    group 
+    hover:shadow-md 
+    hover:border-orange-300 
+    transition-all duration-300">
+
+                                <HelpCircle
+                                    className="w-5 h-5 text-orange-500 
+        transition-all duration-300 
+        group-hover:scale-110"
+                                />
+
+                                <span className="text-gray-700 font-medium text-[15px] 
+        transition-colors duration-300 
+        group-hover:text-black">
+                                    FAQ
+                                </span>
                             </div>
 
 
