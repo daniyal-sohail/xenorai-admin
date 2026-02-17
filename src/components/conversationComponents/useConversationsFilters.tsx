@@ -7,7 +7,6 @@ export const useConversationFilters = (conversations: IConversation[]) => {
     const filteredConversations = useMemo(() => {
         let result = [...conversations];
 
-        // Search filter (visitor ID or last message content)
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
             result = result.filter(
@@ -18,29 +17,22 @@ export const useConversationFilters = (conversations: IConversation[]) => {
             );
         }
 
-        // Status filter
         if (filters.status) {
             result = result.filter((conv) => conv.status === filters.status);
         }
 
-        // Date range filter
         if (filters.startDate) {
             const startDate = new Date(filters.startDate);
             startDate.setHours(0, 0, 0, 0);
-            result = result.filter(
-                (conv) => new Date(conv.lastMessageAt) >= startDate
-            );
+            result = result.filter((conv) => new Date(conv.lastMessageAt) >= startDate);
         }
 
         if (filters.endDate) {
             const endDate = new Date(filters.endDate);
             endDate.setHours(23, 59, 59, 999);
-            result = result.filter(
-                (conv) => new Date(conv.lastMessageAt) <= endDate
-            );
+            result = result.filter((conv) => new Date(conv.lastMessageAt) <= endDate);
         }
 
-        // Sort by last message time (newest first)
         result.sort(
             (a, b) =>
                 new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()

@@ -13,127 +13,117 @@ const ConversationFiltersComponent: FC<ConversationFiltersProps> = ({
     filters,
     onFilterChange,
 }) => {
-    const handleSearchChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            onFilterChange({ ...filters, search: e.target.value });
-        },
+    const handleSearch = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) =>
+            onFilterChange({ ...filters, search: e.target.value }),
         [filters, onFilterChange]
     );
 
-    const handleStatusChange = useCallback(
-        (e: React.ChangeEvent<HTMLSelectElement>) => {
-            const value = e.target.value;
-            onFilterChange({
-                ...filters,
-                status: value ? (value as any) : undefined,
-            });
-        },
+    const handleStatus = useCallback(
+        (e: React.ChangeEvent<HTMLSelectElement>) =>
+            onFilterChange({ ...filters, status: e.target.value ? (e.target.value as any) : undefined }),
         [filters, onFilterChange]
     );
 
-    const handleDateFromChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            onFilterChange({ ...filters, startDate: e.target.value });
-        },
+    const handleDateFrom = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) =>
+            onFilterChange({ ...filters, startDate: e.target.value }),
         [filters, onFilterChange]
     );
 
-    const handleDateToChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            onFilterChange({ ...filters, endDate: e.target.value });
-        },
+    const handleDateTo = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) =>
+            onFilterChange({ ...filters, endDate: e.target.value }),
         [filters, onFilterChange]
     );
 
-    const handleClearFilters = useCallback(() => {
-        onFilterChange({});
-    }, [onFilterChange]);
-
-    const hasActiveFilters = !!(
-        filters.search ||
-        filters.status ||
-        filters.startDate ||
-        filters.endDate
+    const clearSearch = useCallback(
+        () => onFilterChange({ ...filters, search: "" }),
+        [filters, onFilterChange]
     );
+
+    const clearFilters = useCallback(
+        () => onFilterChange({}),
+        [onFilterChange]
+    );
+
+    const hasActiveFilters = !!(filters.search || filters.status || filters.startDate || filters.endDate);
 
     return (
-        <div className="bg-white border-b border-gray-200 p-4">
-            <div className="flex flex-col gap-3">
-                {/* Search */}
-                <div className="relative">
-                    <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search conversations..."
-                        value={filters.search || ""}
-                        onChange={handleSearchChange}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    />
-                </div>
-
-                {/* Filters Row */}
-                <div className="grid grid-cols-3 gap-2">
-                    {/* Status Filter */}
-                    <div className="relative">
-                        <select
-                            value={filters.status || ""}
-                            onChange={handleStatusChange}
-                            className="appearance-none w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer text-sm"
-                        >
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="handoff">Handoff</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                        <Filter
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={14}
-                        />
-                    </div>
-
-                    {/* Date From */}
-                    <div className="relative">
-                        <Calendar
-                            className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={14}
-                        />
-                        <input
-                            type="date"
-                            value={filters.startDate || ""}
-                            onChange={handleDateFromChange}
-                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                        />
-                    </div>
-
-                    {/* Date To */}
-                    <div className="relative">
-                        <Calendar
-                            className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={14}
-                        />
-                        <input
-                            type="date"
-                            value={filters.endDate || ""}
-                            onChange={handleDateToChange}
-                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                        />
-                    </div>
-                </div>
-
-                {/* Clear Filters */}
-                {hasActiveFilters && (
+        <div className="p-4 space-y-3" style={{ borderBottom: "1px solid #f3f4f6" }}>
+            {/* Search */}
+            <div className="relative">
+                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                    type="text"
+                    placeholder="Search conversations…"
+                    value={filters.search || ""}
+                    onChange={handleSearch}
+                    className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm transition-all focus:outline-none bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
+                />
+                {filters.search && (
                     <button
-                        onClick={handleClearFilters}
-                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 self-start"
+                        onClick={clearSearch}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={14} />
-                        Clear Filters
+                        <X size={13} />
                     </button>
                 )}
             </div>
+
+            {/* Filters row */}
+            <div className="grid grid-cols-3 gap-2">
+                {/* Status */}
+                <div className="relative">
+                    <select
+                        value={filters.status || ""}
+                        onChange={handleStatus}
+                        className="appearance-none w-full px-3 py-2 pr-7 rounded-xl text-xs font-semibold transition-all focus:outline-none cursor-pointer bg-white border border-gray-200 text-gray-700 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
+                    >
+                        <option value="">All Status</option>
+                        <option value="active">AI Active</option>
+                        <option value="handoff">Manual</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <Filter size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* Date from */}
+                <div className="relative">
+                    <Calendar size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <input
+                        type="date"
+                        value={filters.startDate || ""}
+                        onChange={handleDateFrom}
+                        className="w-full pl-7 pr-2 py-2 rounded-xl text-xs transition-all focus:outline-none bg-white border border-gray-200 text-gray-700 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
+                    />
+                </div>
+
+                {/* Date to */}
+                <div className="relative">
+                    <Calendar size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <input
+                        type="date"
+                        value={filters.endDate || ""}
+                        onChange={handleDateTo}
+                        className="w-full pl-7 pr-2 py-2 rounded-xl text-xs transition-all focus:outline-none bg-white border border-gray-200 text-gray-700 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
+                    />
+                </div>
+            </div>
+
+            {/* Clear filters */}
+            {hasActiveFilters && (
+                <button
+                    onClick={clearFilters}
+                    className="text-xs font-semibold flex items-center gap-1 transition-colors"
+                    style={{ color: "#f97518" }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "#ea5a00"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "#f97518"}
+                >
+                    <X size={12} />
+                    Clear Filters
+                </button>
+            )}
         </div>
     );
 };

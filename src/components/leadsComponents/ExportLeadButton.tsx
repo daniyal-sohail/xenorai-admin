@@ -17,13 +17,10 @@ export const ExportLeadsButton: FC<ExportLeadsButtonProps> = ({
 
     const exportToCSV = useCallback(() => {
         setIsExporting(true);
-
         try {
-            // Create CSV header
             const headers = ["Email", "Name", "Phone", "Created At", "Updated At"];
             const csvRows = [headers.join(",")];
 
-            // Add data rows
             leads.forEach((lead) => {
                 const row = [
                     `"${lead.email}"`,
@@ -35,7 +32,6 @@ export const ExportLeadsButton: FC<ExportLeadsButtonProps> = ({
                 csvRows.push(row.join(","));
             });
 
-            // Create blob and download
             const csvContent = csvRows.join("\n");
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
@@ -64,10 +60,10 @@ export const ExportLeadsButton: FC<ExportLeadsButtonProps> = ({
         <button
             onClick={exportToCSV}
             disabled={isExporting}
-            className="px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all flex items-center gap-2 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
         >
-            <Download size={18} />
-            {isExporting ? "Exporting..." : "Export CSV"}
+            <Download size={14} />
+            {isExporting ? "Exporting…" : "Export CSV"}
         </button>
     );
 };

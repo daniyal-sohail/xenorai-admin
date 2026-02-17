@@ -13,59 +13,53 @@ const ConversationStatsCardComponent: FC<ConversationStatsCardProps> = ({ stats 
 
     const statItems = [
         {
-            label: "Total Conversations",
+            label: "Total",
             value: stats.total,
             icon: MessageSquare,
-            color: "indigo",
-            bgColor: "bg-indigo-100",
-            textColor: "text-indigo-600",
+            iconStyle: { background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)", color: "#f97518" },
+            valueStyle: { color: "#111827" },
         },
         {
             label: "Active (AI)",
             value: stats.active,
             icon: Bot,
-            color: "emerald",
-            bgColor: "bg-emerald-100",
-            textColor: "text-emerald-600",
+            iconStyle: { background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#059669" },
+            valueStyle: { color: "#059669" },
         },
         {
-            label: "Needs Attention",
+            label: "Manual",
             value: stats.handoff,
             icon: AlertCircle,
-            color: "orange",
-            bgColor: "bg-orange-100",
-            textColor: "text-orange-600",
+            iconStyle: { background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)", color: "#f97518" },
+            valueStyle: { color: "#111827" },
         },
         {
             label: "Closed",
             value: stats.closed,
             icon: XCircle,
-            color: "gray",
-            bgColor: "bg-gray-100",
-            textColor: "text-gray-600",
+            iconStyle: { background: "#f9fafb", border: "1px solid #e5e7eb", color: "#9ca3af" },
+            valueStyle: { color: "#6b7280" },
         },
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {statItems.map((stat, index) => (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {statItems.map((stat, i) => (
                 <div
-                    key={index}
-                    className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+                    key={i}
+                    className="bg-white rounded-2xl p-5 transition-shadow hover:shadow-md"
+                    style={{ border: "1px solid #e5e7eb" }}
                 >
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600 font-medium mb-1">
-                                {stat.label}
-                            </p>
-                            <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                        </div>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{stat.label}</p>
                         <div
-                            className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}
+                            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={stat.iconStyle}
                         >
-                            <stat.icon className={stat.textColor} size={24} />
+                            <stat.icon size={15} style={{ color: stat.iconStyle.color }} />
                         </div>
                     </div>
+                    <p className="text-2xl font-bold" style={stat.valueStyle}>{stat.value}</p>
                 </div>
             ))}
         </div>

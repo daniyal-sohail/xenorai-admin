@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Users, TrendingUp, Phone, UserCheck } from "lucide-react";
+import { Users, TrendingUp, Phone, UserCheck, Sparkles } from "lucide-react";
 import { useLeadStore } from "@/store/leads.store";
 import { useDomainStore } from "@/store/domain.store";
 import { ILead } from "@/api/LeadsApi";
@@ -182,14 +182,24 @@ export default function LeadsPage() {
 
     return (
         <div className="" style={{ background: "rgb(var(--background))" }}>
-            <div className="text-black mb-6">
-                <div className="max-w-7xl flex items-center justify-between mx-auto">
-                    <div>
-                        <h1 className="text-3xl font-bold mb-2">Lead Management</h1>
-                        <p className="text-gray-700">
-                            Track and manage leads collected from your chatbot
-                        </p>
+            <div className="bg-[rgb(var(--surface))] mb-8 border-b border-[rgb(var(--border))]">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between ">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--primary-hover))] flex items-center justify-center shadow-sm shadow-orange-200">
+                            <Sparkles size={16} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-[rgb(var(--foreground))] leading-tight">
+                                Lead Management
+                            </h1>
+                            {!loading && (
+                                <p className="text-xs text-[rgb(var(--text-muted))]">
+                                    {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""} collected
+                                </p>
+                            )}
+                        </div>
                     </div>
+
                     <ExportLeadsButton
                         leads={filteredLeads}
                         domainName={selectedDomain?.domainName}

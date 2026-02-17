@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo } from "react";
-import { Mail, Phone, Calendar, Edit2, Trash2, ChevronLeft, ChevronRight, Globe } from "lucide-react";
+import { Mail, Phone, Calendar, Edit2, Trash2, Globe } from "lucide-react";
 import { ILead } from "./LeadsTypes";
 import { IDomain } from "@/api/DomainApi";
 
@@ -18,6 +18,44 @@ interface LeadTableProps {
     onDelete: (id: string) => void;
 }
 
+const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+const getInitials = (lead: ILead) => {
+    if (lead.name) return lead.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    return lead.email.charAt(0).toUpperCase();
+};
+
+const ActionBtn: FC<{
+    onClick: () => void;
+    title: string;
+    variant: "edit" | "delete";
+    children: React.ReactNode;
+}> = ({ onClick, title, variant, children }) => {
+    const style = variant === "edit"
+        ? { color: "#6b7280", hoverColor: "#f97518", hoverBg: "rgba(249,117,24,0.08)" }
+        : { color: "#6b7280", hoverColor: "#ef4444", hoverBg: "rgba(239,68,68,0.08)" };
+
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+            style={{ color: style.color }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.color = style.hoverColor;
+                e.currentTarget.style.background = style.hoverBg;
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.color = style.color;
+                e.currentTarget.style.background = "transparent";
+            }}
+        >
+            {children}
+        </button>
+    );
+};
+
 const LeadTableComponent: FC<LeadTableProps> = ({
     leads,
     loading,
@@ -30,204 +68,171 @@ const LeadTableComponent: FC<LeadTableProps> = ({
     onEdit,
     onDelete,
 }) => {
-    const getDomainName = (domainId: string) => {
-        return domains.find(d => d._id === domainId)?.domainName || "Unknown Domain";
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        });
-    };
-
-    const getInitials = (lead: ILead) => {
-        if (lead.name) {
-            return lead.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .slice(0, 2);
-        }
-        return lead.email.charAt(0).toUpperCase();
-    };
+    const getDomainName = (domainId: string) =>
+        domains.find(d => d._id === domainId)?.domainName || "Unknown Domain";
 
     const startIndex = (currentPage - 1) * itemsPerPage + 1;
     const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
 
+    const pageNumbers = () => {
+        const pages: (number | string)[] = [];
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else if (currentPage <= 3) {
+            for (let i = 1; i <= 4; i++) pages.push(i);
+            pages.push("...");
+            pages.push(totalPages);
+        } else if (currentPage >= totalPages - 2) {
+            pages.push(1);
+            pages.push("...");
+            for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            pages.push("...");
+            for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+            pages.push("...");
+            pages.push(totalPages);
+        }
+        return pages;
+    };
+
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            {/* Table */}
+        <div
+            className="rounded-2xl overflow-hidden bg-white"
+            style={{ border: "1px solid #e5e7eb" }}
+        >
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Lead
-                            </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Contact
-                            </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Domain
-                            </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Date Added
-                            </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Tags
-                            </th>
-                            <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Actions
-                            </th>
+                        <tr style={{ borderBottom: "1px solid #f3f4f6", background: "#fafafa" }}>
+                            {[
+                                { label: "Lead", cls: "px-6 text-left" },
+                                { label: "Contact", cls: "px-6 text-left" },
+                                { label: "Domain", cls: "px-6 text-left hidden md:table-cell" },
+                                { label: "Date Added", cls: "px-6 text-left hidden lg:table-cell" },
+                                { label: "Tags", cls: "px-6 text-left hidden xl:table-cell" },
+                                { label: "Actions", cls: "px-6 text-right" },
+                            ].map(({ label, cls }) => (
+                                <th
+                                    key={label}
+                                    className={`${cls} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400`}
+                                >
+                                    {label}
+                                </th>
+                            ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody>
                         {loading ? (
-                            // Loading skeleton
                             Array.from({ length: 5 }).map((_, i) => (
-                                <tr key={i} className="animate-pulse">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gray-200" />
-                                            <div className="space-y-2">
-                                                <div className="h-4 bg-gray-200 rounded w-32" />
-                                                <div className="h-3 bg-gray-200 rounded w-24" />
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="space-y-2">
-                                            <div className="h-3 bg-gray-200 rounded w-40" />
-                                            <div className="h-3 bg-gray-200 rounded w-32" />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="h-3 bg-gray-200 rounded w-28" />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="h-3 bg-gray-200 rounded w-24" />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex gap-2">
-                                            <div className="h-6 bg-gray-200 rounded-full w-16" />
-                                            <div className="h-6 bg-gray-200 rounded-full w-20" />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex justify-end gap-2">
-                                            <div className="h-8 w-8 bg-gray-200 rounded-lg" />
-                                            <div className="h-8 w-8 bg-gray-200 rounded-lg" />
-                                        </div>
-                                    </td>
+                                <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                                    {[...Array(6)].map((_, j) => (
+                                        <td key={j} className="px-6 py-3.5">
+                                            <div
+                                                className="h-3 rounded animate-pulse"
+                                                style={{
+                                                    background: "linear-gradient(90deg, #f3f4f6 25%, #e9eaec 50%, #f3f4f6 75%)",
+                                                    backgroundSize: "200% 100%",
+                                                    animation: "shimmer 1.6s infinite",
+                                                    width: j === 0 ? "60%" : "80%",
+                                                }}
+                                            />
+                                        </td>
+                                    ))}
                                 </tr>
                             ))
                         ) : (
-                            leads.map((lead) => (
+                            leads.map((lead, idx) => (
                                 <tr
                                     key={lead._id}
-                                    className="hover:bg-gray-50 transition-colors"
+                                    className="group transition-colors hover:bg-gray-50/80"
+                                    style={{ borderBottom: idx < leads.length - 1 ? "1px solid #f3f4f6" : "none" }}
                                 >
-                                    {/* Lead Info */}
-                                    <td className="px-6 py-4">
+                                    {/* Lead info */}
+                                    <td className="px-6 py-3.5">
                                         <div className="flex items-center gap-3">
                                             <div
-                                                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-                                                style={{ background: "rgb(var(--primary))" }}
+                                                className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                                                style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)" }}
                                             >
                                                 {getInitials(lead)}
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-gray-900">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 truncate leading-tight">
                                                     {lead.name || "Anonymous Lead"}
                                                 </p>
-                                                <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                    <Mail size={12} />
-                                                    {lead.email}
-                                                </p>
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                    <Mail size={10} className="text-gray-400" />
+                                                    <p className="text-xs text-gray-400 truncate">{lead.email}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
 
-                                    {/* Contact Info */}
-                                    <td className="px-6 py-4">
+                                    {/* Contact */}
+                                    <td className="px-6 py-3.5">
                                         {lead.phone ? (
                                             <a
                                                 href={`tel:${lead.phone}`}
-                                                className="text-sm text-gray-700 hover:text-orange-600 flex items-center gap-2 transition-colors"
+                                                className="text-sm text-gray-700 hover:text-[#f97518] flex items-center gap-1.5 transition-colors"
                                             >
-                                                <Phone size={14} />
+                                                <Phone size={13} />
                                                 {lead.phone}
                                             </a>
                                         ) : (
-                                            <span className="text-sm text-gray-400 italic">
-                                                No phone
-                                            </span>
+                                            <span className="text-sm text-gray-400 italic">No phone</span>
                                         )}
                                     </td>
 
                                     {/* Domain */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                                            <Globe size={14} className="text-orange-500" />
-                                            <span className="font-medium">{getDomainName(lead.domainId)}</span>
+                                    <td className="px-6 py-3.5 hidden md:table-cell">
+                                        <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                                            <Globe size={12} style={{ color: "#f97518" }} />
+                                            <span className="font-medium truncate max-w-[150px]">{getDomainName(lead.domainId)}</span>
                                         </div>
                                     </td>
 
                                     {/* Date */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Calendar size={14} />
+                                    <td className="px-6 py-3.5 hidden lg:table-cell">
+                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                                            <Calendar size={12} />
                                             {formatDate(lead.createdAt)}
                                         </div>
                                     </td>
 
                                     {/* Tags */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-3.5 hidden xl:table-cell">
                                         {lead.tags && lead.tags.length > 0 ? (
                                             <div className="flex flex-wrap gap-1">
-                                                {lead.tags.slice(0, 2).map((tag, index) => (
+                                                {lead.tags.slice(0, 2).map((tag, i) => (
                                                     <span
-                                                        key={index}
-                                                        className="px-2 py-1 text-xs rounded-full font-medium"
-                                                        style={{
-                                                            background: "rgb(var(--primary-light-3))",
-                                                            color: "rgb(var(--primary))",
-                                                        }}
+                                                        key={i}
+                                                        className="px-2 py-0.5 rounded-lg text-xs font-semibold"
+                                                        style={{ background: "rgba(249,117,24,0.08)", color: "#ea5a00", border: "1px solid rgba(249,117,24,0.15)" }}
                                                     >
                                                         {tag}
                                                     </span>
                                                 ))}
                                                 {lead.tags.length > 2 && (
-                                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">
+                                                    <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-500">
                                                         +{lead.tags.length - 2}
                                                     </span>
                                                 )}
                                             </div>
                                         ) : (
-                                            <span className="text-sm text-gray-400">-</span>
+                                            <span className="text-sm text-gray-400">—</span>
                                         )}
                                     </td>
 
                                     {/* Actions */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => onEdit(lead)}
-                                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-orange-600"
-                                                title="Edit lead"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => onDelete(lead._id)}
-                                                className="p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-600 hover:text-red-600"
-                                                title="Delete lead"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                    <td className="px-6 py-3.5">
+                                        <div className="flex items-center justify-end gap-0.5">
+                                            <ActionBtn onClick={() => onEdit(lead)} title="Edit lead" variant="edit">
+                                                <Edit2 size={14} />
+                                            </ActionBtn>
+                                            <ActionBtn onClick={() => onDelete(lead._id)} title="Delete lead" variant="delete">
+                                                <Trash2 size={14} />
+                                            </ActionBtn>
                                         </div>
                                     </td>
                                 </tr>
@@ -239,72 +244,41 @@ const LeadTableComponent: FC<LeadTableProps> = ({
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        Showing <span className="font-medium">{startIndex}</span> to{" "}
-                        <span className="font-medium">{endIndex}</span> of{" "}
-                        <span className="font-medium">{totalItems}</span> results
+                <div className="px-6 py-4 flex items-center justify-between" style={{ borderTop: "1px solid #f3f4f6" }}>
+                    <div className="text-xs text-gray-500">
+                        Showing <span className="font-semibold text-gray-700">{startIndex}</span> –{" "}
+                        <span className="font-semibold text-gray-700">{endIndex}</span> of{" "}
+                        <span className="font-semibold text-gray-700">{totalItems}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => onPageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm font-medium"
-                        >
-                            <ChevronLeft size={16} />
-                            Previous
-                        </button>
-
-                        <div className="flex items-center gap-1">
-                            {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                .filter((page) => {
-                                    // Show first, last, current, and adjacent pages
-                                    return (
-                                        page === 1 ||
-                                        page === totalPages ||
-                                        Math.abs(page - currentPage) <= 1
-                                    );
-                                })
-                                .map((page, index, array) => {
-                                    // Add ellipsis if there's a gap
-                                    const prevPage = array[index - 1];
-                                    const showEllipsis = prevPage && page - prevPage > 1;
-
-                                    return (
-                                        <div key={page} className="flex items-center gap-1">
-                                            {showEllipsis && (
-                                                <span className="px-2 text-gray-400">...</span>
-                                            )}
-                                            <button
-                                                onClick={() => onPageChange(page)}
-                                                className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                                    ? "text-white"
-                                                    : "text-gray-700 hover:bg-gray-100"
-                                                    }`}
-                                                style={
-                                                    currentPage === page
-                                                        ? { background: "rgb(var(--primary))" }
-                                                        : {}
-                                                }
-                                            >
-                                                {page}
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                        </div>
-
-                        <button
-                            onClick={() => onPageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm font-medium"
-                        >
-                            Next
-                            <ChevronRight size={16} />
-                        </button>
+                    <div className="flex items-center gap-1.5">
+                        {pageNumbers().map((page, idx) =>
+                            page === "..." ? (
+                                <span key={`e${idx}`} className="px-2 text-xs text-gray-400">…</span>
+                            ) : (
+                                <button
+                                    key={page}
+                                    onClick={() => onPageChange(page as number)}
+                                    className="min-w-[32px] h-8 px-2 rounded-lg text-xs font-bold transition-all hover:bg-gray-100"
+                                    style={
+                                        currentPage === page
+                                            ? { background: "#f97518", color: "#fff", boxShadow: "0 0 12px rgba(249,117,24,0.3)" }
+                                            : { color: "#6b7280" }
+                                    }
+                                >
+                                    {page}
+                                </button>
+                            )
+                        )}
                     </div>
                 </div>
             )}
+
+            <style>{`
+        @keyframes shimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position:  200% 0; }
+        }
+      `}</style>
         </div>
     );
 };

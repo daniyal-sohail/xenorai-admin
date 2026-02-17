@@ -7,34 +7,27 @@ export const useLeadFilters = (leads: ILead[]) => {
     const filteredLeads = useMemo(() => {
         let result = [...leads];
 
-        // Search filter (name or email)
         if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
+            const s = filters.search.toLowerCase();
             result = result.filter(
                 (lead) =>
-                    lead.email.toLowerCase().includes(searchLower) ||
-                    (lead.name && lead.name.toLowerCase().includes(searchLower))
+                    lead.email.toLowerCase().includes(s) ||
+                    (lead.name && lead.name.toLowerCase().includes(s))
             );
         }
 
-        // Date range filter
         if (filters.dateFrom) {
             const fromDate = new Date(filters.dateFrom);
             fromDate.setHours(0, 0, 0, 0);
-            result = result.filter(
-                (lead) => new Date(lead.createdAt) >= fromDate
-            );
+            result = result.filter((lead) => new Date(lead.createdAt) >= fromDate);
         }
 
         if (filters.dateTo) {
             const toDate = new Date(filters.dateTo);
             toDate.setHours(23, 59, 59, 999);
-            result = result.filter(
-                (lead) => new Date(lead.createdAt) <= toDate
-            );
+            result = result.filter((lead) => new Date(lead.createdAt) <= toDate);
         }
 
-        // Has phone filter
         if (filters.hasPhone !== undefined) {
             result = result.filter((lead) => {
                 const hasPhone = !!(lead.phone && lead.phone.trim());
@@ -42,7 +35,6 @@ export const useLeadFilters = (leads: ILead[]) => {
             });
         }
 
-        // Has name filter
         if (filters.hasName !== undefined) {
             result = result.filter((lead) => {
                 const hasName = !!(lead.name && lead.name.trim());
