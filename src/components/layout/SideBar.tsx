@@ -15,6 +15,7 @@ import {
     X
 } from "lucide-react";
 import { useUIStore } from "@/store/sidebar.store";
+import Image from "next/image";
 
 type NavItem = { path: string; label: string; icon: LucideIcon };
 
@@ -51,12 +52,18 @@ export default function Sidebar() {
                 <div className="px-4 py-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">DX</span>
+                            <div className="w-8 h-8  flex items-center justify-center">
+                                <Image
+                                    src="/logo.png"  // put your image inside /public folder
+                                    alt="X Logo"
+                                    width={50}
+                                    height={50}
+                                    className="object-contain"
+                                />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-[rgb(var(--foreground))]">DevXcript</h1>
-                                <p className="text-xs text-[rgb(var(--text-muted))]">Student Portal</p>
+                                <h1 className="text-lg font-bold text-[rgb(var(--foreground))]">XenorAi</h1>
+
                             </div>
                         </div>
                         <button

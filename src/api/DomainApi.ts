@@ -123,4 +123,22 @@ export const DomainApi = {
             return handleError(error);
         }
     },
+
+    getByKey: async (domainKey: string): Promise<IDomain> => {
+        try {
+            const res = await API.get(`/domains/public/${domainKey}`);
+            return res.data.data.domain;
+        } catch (error) {
+            return handleError(error);
+        }
+    },
+
+    getScriptByKey: async (domainKey: string): Promise<string> => {
+        try {
+            const res = await API.get(`/domains/public/${domainKey}/script`);
+            return res.data.data.script;
+        } catch (error) {
+            return handleError(error);
+        }
+    },
 };

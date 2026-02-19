@@ -103,5 +103,40 @@ export const ConversationApi = {
         } catch (err) {
             return handleError(err);
         }
-    }
+    },
+
+    sendPublicChatMessage: async (domainKey: string, content: string, visitorId?: string): Promise<{
+        message: IMessage;
+        botResponse?: IMessage;
+        visitorId: string;
+        conversationId: string;
+    }> => {
+        try {
+            const res = await API.post("/conversations/public/chat", {
+                domainKey,
+                content,
+                visitorId,
+            });
+            return res.data.data;
+        } catch (err) {
+            return handleError(err);
+        }
+    },
+
+    requestPublicHandoff: async (
+        domainKey: string,
+        conversationId: string,
+        visitorId: string
+    ): Promise<{ conversation: IConversation }> => {
+        try {
+            const res = await API.post("/conversations/public/handoff", {
+                domainKey,
+                conversationId,
+                visitorId,
+            });
+            return res.data.data;
+        } catch (err) {
+            return handleError(err);
+        }
+    },
 };
