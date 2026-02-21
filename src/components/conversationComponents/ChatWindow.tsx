@@ -11,7 +11,6 @@ interface ChatWindowProps {
     isLoading: boolean;
     onSendMessage: (content: string) => void;
     onToggleAI: (enabled: boolean) => void;
-    onCloseConversation: () => void;
     isSending: boolean;
 }
 
@@ -21,7 +20,6 @@ export const ChatWindow: FC<ChatWindowProps> = ({
     isLoading,
     onSendMessage,
     onToggleAI,
-    onCloseConversation,
     isSending,
 }) => {
     const [messageInput, setMessageInput] = useState("");
@@ -94,7 +92,6 @@ export const ChatWindow: FC<ChatWindowProps> = ({
                         {/* AI Toggle */}
                         <button
                             onClick={() => onToggleAI(!conversation.aiEnabled)}
-                            disabled={conversation.status === "closed"}
                             className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             style={
                                 conversation.aiEnabled
@@ -104,22 +101,11 @@ export const ChatWindow: FC<ChatWindowProps> = ({
                         >
                             {conversation.aiEnabled ? <><Bot size={13} /> AI</> : <><User size={13} /> Manual</>}
                         </button>
-
-                        {/* Close */}
-                        {conversation.status !== "closed" && (
-                            <button
-                                onClick={onCloseConversation}
-                                className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
-                                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-                            >
-                                <X size={13} /> Close
-                            </button>
-                        )}
                     </div>
                 </div>
 
                 {/* Warnings */}
-                {!conversation.aiEnabled && conversation.status !== "closed" && (
+                {!conversation.aiEnabled && (
                     <div
                         className="rounded-xl px-3 py-2 flex items-center gap-2"
                         style={{ background: "rgba(249,117,24,0.05)", border: "1px solid rgba(249,117,24,0.15)" }}
@@ -128,16 +114,6 @@ export const ChatWindow: FC<ChatWindowProps> = ({
                         <p className="text-xs font-medium" style={{ color: "#ea5a00" }}>
                             Manual mode — You're now responding
                         </p>
-                    </div>
-                )}
-
-                {conversation.status === "closed" && (
-                    <div
-                        className="rounded-xl px-3 py-2 flex items-center gap-2"
-                        style={{ background: "#f9fafb", border: "1px solid #e5e7eb" }}
-                    >
-                        <AlertCircle size={13} className="text-gray-400" />
-                        <p className="text-xs font-medium text-gray-500">Conversation closed</p>
                     </div>
                 )}
             </div>
@@ -163,42 +139,40 @@ export const ChatWindow: FC<ChatWindowProps> = ({
             </div>
 
             {/* Input */}
-            {conversation.status !== "closed" && (
-                <div className="px-5 py-4" style={{ borderTop: "1px solid #f3f4f6" }}>
-                    {conversation.aiEnabled ? (
-                        <div
-                            className="rounded-xl px-4 py-3 text-center"
-                            style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.15)" }}
+            <div className="px-5 py-4" style={{ borderTop: "1px solid #f3f4f6" }}>
+                {conversation.aiEnabled ? (
+                    <div
+                        className="rounded-xl px-4 py-3 text-center"
+                        style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.15)" }}
+                    >
+                        <p className="text-xs font-medium text-emerald-700">
+                            AI is handling this conversation. Disable AI mode to send manual messages.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="flex gap-2">
+                        <textarea
+                            ref={inputRef}
+                            value={messageInput}
+                            onChange={(e) => setMessageInput(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            placeholder="Type your message…"
+                            rows={1}
+                            className="flex-1 px-4 py-2.5 rounded-xl text-sm resize-none transition-all focus:outline-none bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
+                            disabled={isSending}
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={!messageInput.trim() || isSending}
+                            className="px-5 py-2.5 rounded-xl text-sm font-bold text-white flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+                            style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)", boxShadow: "0 4px 16px rgba(249,117,24,0.25)" }}
                         >
-                            <p className="text-xs font-medium text-emerald-700">
-                                AI is handling this conversation. Disable AI mode to send manual messages.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex gap-2">
-                            <textarea
-                                ref={inputRef}
-                                value={messageInput}
-                                onChange={(e) => setMessageInput(e.target.value)}
-                                onKeyDown={handleKeyPress}
-                                placeholder="Type your message…"
-                                rows={1}
-                                className="flex-1 px-4 py-2.5 rounded-xl text-sm resize-none transition-all focus:outline-none bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 hover:border-gray-300 focus:border-[#f97518] focus:ring-2 focus:ring-[rgba(249,117,24,0.12)]"
-                                disabled={isSending}
-                            />
-                            <button
-                                onClick={handleSend}
-                                disabled={!messageInput.trim() || isSending}
-                                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
-                                style={{ background: "linear-gradient(135deg, #f97518, #ea5a00)", boxShadow: "0 4px 16px rgba(249,117,24,0.25)" }}
-                            >
-                                {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                                Send
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+                            {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                            Send
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

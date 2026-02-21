@@ -3,6 +3,7 @@ export interface IMessage {
     conversationId: string;
     sender: "visitor" | "bot" | "human";
     content: string;
+    isRead: boolean;
     meta?: Record<string, any>;
     createdAt: string;
     updatedAt?: string;
@@ -17,7 +18,7 @@ export interface IConversation {
     };
     userId: string;
     visitorId: string;
-    status: "active" | "handoff" | "closed";
+    status: "active" | "handoff";
     aiEnabled: boolean;
     lastMessageAt: string;
     createdAt: string;
@@ -36,12 +37,11 @@ export interface IConversationStats {
     total: number;
     active: number;
     handoff: number;
-    closed: number;
 }
 
 export interface ConversationFilters {
     domainId?: string;
-    status?: "active" | "handoff" | "closed";
+    status?: "active" | "handoff";
     search?: string;
     startDate?: string;
     endDate?: string;

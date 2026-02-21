@@ -76,7 +76,7 @@ export default function Sidebar() {
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-3">
+                <nav className="p-3 my-4">
                     <div className="space-y-1">
                         {navItems.map(({ path, label, icon: Icon }) => {
                             const isActive = pathname === path;

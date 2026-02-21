@@ -23,77 +23,95 @@ export default function ConversationsPage() {
         stats,
         loading,
         error,
+        unreadCounts,
         fetchConversations,
         fetchConversationMessages,
+        markMessagesAsRead,
         selectConversation,
         fetchStats,
+        setConversationsFromSocket,
+        setUnreadCounts,
+        addIncomingMessage,
+        updateConversationUnread,
     } = useConversationStore();
 
     const { domains, fetchDomains } = useDomainStore();
-    const { user } = useAuthStore();
+    const { user, accessToken } = useAuthStore(); // accessToken passed to useSocket
 
-    // Local state
     const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [messagesLoading, setMessagesLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
 
-    // Toast state
-    const [toast, setToast] = useState<{
-        open: boolean;
-        type: PopupType;
-        message: string;
-    }>({
+    const [toast, setToast] = useState<{ open: boolean; type: PopupType; message: string }>({
         open: false,
         type: "info",
         message: "",
     });
 
-    // Filters
+    const showToast = useCallback((type: PopupType, message: string) => {
+        setToast({ open: true, type, message });
+    }, []);
+
     const { filters, filteredConversations, handleFilterChange, hasActiveFilters } =
         useConversationFilters(conversations);
 
-    // Socket.IO real-time connection
-    const { sendMessage, toggleAI, closeConversation: socketCloseConversation, isConnected } = useSocket({
-        userId: user?.id || "",
+    // Socket — token verified server-side, no userId in payloads
+    const { sendMessage, toggleAI, isConnected } = useSocket({
+        token: accessToken || "",
         domainId: selectedDomainId || undefined,
-        onNewMessage: useCallback((message: IMessage) => {
-            setMessages((prev) => [...prev, message]);
 
-            // Update conversation's last message in the list
-            useConversationStore.setState((state: any) => ({
-                conversations: state.conversations.map((conv: any) =>
-                    conv._id === message.conversationId
-                        ? { ...conv, lastMessage: message, lastMessageAt: message.createdAt }
-                        : conv
-                ),
-            }));
-        }, []),
+        // Backend emits conversations_list + unread_counts on owner_join
+        onConversationsList: setConversationsFromSocket,
+        onUnreadCounts: setUnreadCounts,
+
+        // New visitor message
+        onVisitorMessageReceived: useCallback((data: any) => {
+            addIncomingMessage(data.conversationId, data.message);
+
+            // Only increment unread badge if this conversation isn't currently open
+            const isOpen = useConversationStore.getState().selectedConversation?._id === data.conversationId;
+            if (!isOpen) {
+                updateConversationUnread(data.conversationId, true);
+            }
+
+            // If this conversation IS open, append to local messages
+            if (isOpen) {
+                setMessages((prev) => [...prev, data.message]);
+            }
+        }, [addIncomingMessage, updateConversationUnread]),
+
+        // AI responded
+        onAiResponseSent: useCallback((data: any) => {
+            addIncomingMessage(data.conversationId, data.message);
+
+            const isOpen = useConversationStore.getState().selectedConversation?._id === data.conversationId;
+            if (isOpen) {
+                setMessages((prev) => [...prev, data.message]);
+            }
+        }, [addIncomingMessage]),
+
+        // Visitor requested human
         onHandoffRequest: useCallback((data: any) => {
-            showToast("info", `Handoff request from visitor on ${data.domainId}`);
-            // Refresh conversations to show handoff status
+            showToast("info", `Handoff requested — a visitor wants to speak with you`);
             if (selectedDomainId) {
                 fetchConversations({ domainId: selectedDomainId });
             }
-        }, [selectedDomainId]),
+        }, [selectedDomainId, showToast, fetchConversations]),
+
         onError: useCallback((errorMsg: string) => {
             showToast("error", errorMsg);
-        }, []),
+        }, [showToast]),
     });
 
-    // Fetch domains on mount
-    useEffect(() => {
-        fetchDomains();
-    }, [fetchDomains]);
+    useEffect(() => { fetchDomains(); }, [fetchDomains]);
 
-    // Auto-select first domain
     useEffect(() => {
         if (domains.length > 0 && !selectedDomainId) {
             setSelectedDomainId(domains[0]._id);
         }
     }, [domains, selectedDomainId]);
 
-    // Fetch conversations and stats when domain changes
     useEffect(() => {
         if (selectedDomainId) {
             fetchConversations({ domainId: selectedDomainId, limit: 100 });
@@ -101,35 +119,25 @@ export default function ConversationsPage() {
         }
     }, [selectedDomainId, fetchConversations, fetchStats]);
 
-    // Fetch messages when conversation is selected
+    // When a conversation is selected — load messages + mark as read
     useEffect(() => {
-        if (selectedConversation) {
-            setMessagesLoading(true);
-            fetchConversationMessages(selectedConversation._id)
-                .then(() => {
-                    // Get messages from the selected conversation
-                    const conversationMessages = selectedConversation.messages || [];
-                    setMessages(conversationMessages);
-                })
-                .catch((err) => {
-                    showToast("error", "Failed to load messages");
-                })
-                .finally(() => {
-                    setMessagesLoading(false);
-                });
-        }
+        if (!selectedConversation) return;
+
+        setMessagesLoading(true);
+        fetchConversationMessages(selectedConversation._id)
+            .then(() => {
+                const msgs = useConversationStore.getState().selectedConversation?.messages || [];
+                setMessages(msgs);
+                // Mark messages as read and clear unread badge
+                markMessagesAsRead(selectedConversation._id);
+            })
+            .catch(() => showToast("error", "Failed to load messages"))
+            .finally(() => setMessagesLoading(false));
     }, [selectedConversation?._id]);
 
-    // Show error toast
     useEffect(() => {
-        if (error) {
-            showToast("error", error);
-        }
+        if (error) showToast("error", error);
     }, [error]);
-
-    const showToast = useCallback((type: PopupType, message: string) => {
-        setToast({ open: true, type, message });
-    }, []);
 
     const handleDomainChange = useCallback((domainId: string) => {
         setSelectedDomainId(domainId || null);
@@ -137,101 +145,65 @@ export default function ConversationsPage() {
         setMessages([]);
     }, [selectConversation]);
 
-    const handleConversationSelect = useCallback(
-        (conversation: IConversation) => {
-            selectConversation(conversation);
-        },
-        [selectConversation]
-    );
+    const handleConversationSelect = useCallback((conversation: IConversation) => {
+        selectConversation(conversation);
+    }, [selectConversation]);
 
-    const handleSendMessage = useCallback(
-        async (content: string) => {
-            if (!selectedConversation || !selectedDomainId) return;
-
-            setIsSending(true);
-            try {
-                sendMessage(
-                    selectedConversation._id,
-                    selectedConversation.visitorId,
-                    content,
-                    selectedDomainId
-                );
-
-                // Optimistically add the message to UI
-                const optimisticMessage: IMessage = {
-                    _id: `temp-${Date.now()}`,
-                    conversationId: selectedConversation._id,
-                    sender: "human",
-                    content,
-                    createdAt: new Date().toISOString(),
-                };
-                setMessages((prev) => [...prev, optimisticMessage]);
-            } catch (err) {
-                showToast("error", "Failed to send message");
-            } finally {
-                setIsSending(false);
-            }
-        },
-        [selectedConversation, selectedDomainId, sendMessage, showToast]
-    );
-
-    const handleToggleAI = useCallback(
-        (enabled: boolean) => {
-            if (!selectedConversation || !selectedDomainId) return;
-
-            toggleAI(
-                selectedConversation._id,
-                selectedDomainId,
-                selectedConversation.visitorId,
-                enabled
-            );
-
-            // Optimistically update the conversation
-            useConversationStore.setState((state: any) => ({
-                selectedConversation: state.selectedConversation
-                    ? { ...state.selectedConversation, aiEnabled: enabled, status: enabled ? "active" : "handoff" }
-                    : null,
-                conversations: state.conversations.map((conv: any) =>
-                    conv._id === selectedConversation._id
-                        ? { ...conv, aiEnabled: enabled, status: enabled ? "active" : "handoff" }
-                        : conv
-                ),
-            }));
-
-            showToast("success", enabled ? "AI enabled" : "AI disabled - You can now chat manually");
-        },
-        [selectedConversation, selectedDomainId, toggleAI, showToast]
-    );
-
-    const handleCloseConversation = useCallback(() => {
+    const handleSendMessage = useCallback(async (content: string) => {
         if (!selectedConversation || !selectedDomainId) return;
 
-        socketCloseConversation(
-            selectedConversation._id,
-            selectedDomainId,
-            selectedConversation.visitorId
-        );
+        setIsSending(true);
+        try {
+            // Send via socket — confirmation comes back as "message_sent" event
+            sendMessage(
+                selectedConversation._id,
+                selectedConversation.visitorId,
+                content,
+                selectedDomainId
+            );
 
-        // Optimistically update
+            // Optimistic UI
+            const optimisticMessage: IMessage = {
+                _id: `temp-${Date.now()}`,
+                conversationId: selectedConversation._id,
+                sender: "human",
+                content,
+                isRead: true,
+                createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, optimisticMessage]);
+        } catch {
+            showToast("error", "Failed to send message");
+        } finally {
+            setIsSending(false);
+        }
+    }, [selectedConversation, selectedDomainId, sendMessage, showToast]);
+
+    const handleToggleAI = useCallback((enabled: boolean) => {
+        if (!selectedConversation || !selectedDomainId) return;
+
+        toggleAI(selectedConversation._id, selectedDomainId, selectedConversation.visitorId, enabled);
+
+        // Optimistic update
         useConversationStore.setState((state: any) => ({
             selectedConversation: state.selectedConversation
-                ? { ...state.selectedConversation, status: "closed", aiEnabled: false }
+                ? { ...state.selectedConversation, aiEnabled: enabled, status: enabled ? "active" : "handoff" }
                 : null,
-            conversations: state.conversations.map((conv: any) =>
-                conv._id === selectedConversation._id
-                    ? { ...conv, status: "closed", aiEnabled: false }
-                    : conv
+            conversations: state.conversations.map((c: any) =>
+                c._id === selectedConversation._id
+                    ? { ...c, aiEnabled: enabled, status: enabled ? "active" : "handoff" }
+                    : c
             ),
         }));
 
-        showToast("success", "Conversation closed");
-    }, [selectedConversation, selectedDomainId, socketCloseConversation, showToast]);
+        showToast("success", enabled ? "AI enabled" : "AI disabled — you can now reply manually");
+    }, [selectedConversation, selectedDomainId, toggleAI, showToast]);
 
     const handleRefresh = useCallback(() => {
         if (selectedDomainId) {
             fetchConversations({ domainId: selectedDomainId, limit: 100 });
             fetchStats(selectedDomainId);
-            showToast("success", "Conversations refreshed!");
+            showToast("success", "Conversations refreshed");
         }
     }, [selectedDomainId, fetchConversations, fetchStats, showToast]);
 
@@ -251,8 +223,6 @@ export default function ConversationsPage() {
                                     Chat with your website visitors in real-time
                                 </p>
                             </div>
-
-                            {/* Connection Status */}
                             <div className="flex items-center gap-2">
                                 {isConnected ? (
                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full">
@@ -267,7 +237,6 @@ export default function ConversationsPage() {
                                 )}
                             </div>
                         </div>
-
                         <button
                             onClick={handleRefresh}
                             disabled={loading || !selectedDomainId}
@@ -283,7 +252,6 @@ export default function ConversationsPage() {
             {/* Content */}
             <div className="flex-1 overflow-hidden">
                 <div className="h-full px-4 sm:px-6 lg:px-8 py-6">
-                    {/* Domain Selector */}
                     <DomainSelector
                         domains={domains}
                         selectedDomainId={selectedDomainId}
@@ -292,21 +260,19 @@ export default function ConversationsPage() {
 
                     {selectedDomainId && (
                         <>
-                            {/* Stats */}
                             <ConversationStatsCard stats={stats} />
 
-                            {/* Two-column layout */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style={{ height: "calc(100vh - 340px)" }}>
+                            <div
+                                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                                style={{ height: "calc(100vh - 340px)" }}
+                            >
                                 <div className="flex h-full">
-                                    {/* Left Sidebar - Conversation List */}
+                                    {/* Sidebar */}
                                     <div className="w-96 border-r border-gray-200 flex flex-col">
-                                        {/* Filters */}
                                         <ConversationFilters
                                             filters={filters}
                                             onFilterChange={handleFilterChange}
                                         />
-
-                                        {/* Conversation List */}
                                         <div className="flex-1 overflow-y-auto">
                                             {loading ? (
                                                 <ConversationListSkeleton count={5} />
@@ -315,7 +281,9 @@ export default function ConversationsPage() {
                                                     <div className="text-center">
                                                         <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />
                                                         <p className="text-gray-600">
-                                                            {hasActiveFilters ? "No conversations match your filters" : "No conversations yet"}
+                                                            {hasActiveFilters
+                                                                ? "No conversations match your filters"
+                                                                : "No conversations yet"}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -325,6 +293,7 @@ export default function ConversationsPage() {
                                                         key={conv._id}
                                                         conversation={conv}
                                                         isSelected={selectedConversation?._id === conv._id}
+                                                        unreadCount={unreadCounts[conv._id] || 0}
                                                         onClick={handleConversationSelect}
                                                     />
                                                 ))
@@ -332,14 +301,13 @@ export default function ConversationsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Right Panel - Chat Window */}
+                                    {/* Chat Window */}
                                     <ChatWindow
                                         conversation={selectedConversation}
                                         messages={messages}
                                         isLoading={messagesLoading}
                                         onSendMessage={handleSendMessage}
                                         onToggleAI={handleToggleAI}
-                                        onCloseConversation={handleCloseConversation}
                                         isSending={isSending}
                                     />
                                 </div>
@@ -349,7 +317,6 @@ export default function ConversationsPage() {
                 </div>
             </div>
 
-            {/* Toast Notifications */}
             <Popup
                 open={toast.open}
                 type={toast.type}

@@ -83,7 +83,6 @@ const ConversationFiltersComponent: FC<ConversationFiltersProps> = ({
                         <option value="">All Status</option>
                         <option value="active">AI Active</option>
                         <option value="handoff">Manual</option>
-                        <option value="closed">Closed</option>
                     </select>
                     <Filter size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>

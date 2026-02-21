@@ -1,13 +1,13 @@
-// src/api/conversation.api.ts
+// src/api/ConversationsApi.ts
 import API from "@/config/ApiConfig";
 import { AxiosError } from "axios";
 
-// types/conversation.types.ts
 export interface IMessage {
     _id: string;
     conversationId: string;
     sender: "visitor" | "bot" | "human";
     content: string;
+    isRead: boolean;
     meta?: Record<string, any>;
     createdAt: string;
     updatedAt?: string;
@@ -22,11 +22,12 @@ export interface IConversation {
     };
     userId: string;
     visitorId: string;
-    status: "active" | "handoff" | "closed";
+    status: "active" | "handoff";
     aiEnabled: boolean;
     lastMessageAt: string;
     createdAt: string;
     lastMessage?: IMessage | null;
+    unreadCount?: number; // populated by backend aggregation
     messages?: IMessage[];
 }
 
@@ -41,12 +42,11 @@ export interface IConversationStats {
     total: number;
     active: number;
     handoff: number;
-    closed: number;
 }
 
 export interface ConversationFilters {
     domainId?: string;
-    status?: "active" | "handoff" | "closed";
+    status?: "active" | "handoff";
     search?: string;
     startDate?: string;
     endDate?: string;
@@ -54,13 +54,14 @@ export interface ConversationFilters {
     limit?: number;
 }
 
-
-
 const handleError = (error: unknown): never => {
     if (error instanceof AxiosError) {
         const responseData = error.response?.data;
         if (responseData?.details && Array.isArray(responseData.details)) {
-            const messages = responseData.details.map((d: any) => d.message || d.msg).filter(Boolean).join(", ");
+            const messages = responseData.details
+                .map((d: any) => d.message || d.msg)
+                .filter(Boolean)
+                .join(", ");
             throw new Error(messages || responseData.message || "Validation error");
         }
         throw new Error(responseData?.message || error.message || "Something went wrong");
@@ -69,7 +70,9 @@ const handleError = (error: unknown): never => {
 };
 
 export const ConversationApi = {
-    fetchConversations: async (filters: ConversationFilters): Promise<{ conversations: IConversation[], pagination: any }> => {
+    fetchConversations: async (
+        filters: ConversationFilters
+    ): Promise<{ conversations: IConversation[]; pagination: IPagination }> => {
         try {
             const res = await API.get("/conversations/owner/conversations", { params: filters });
             return res.data.data;
@@ -78,19 +81,25 @@ export const ConversationApi = {
         }
     },
 
-    fetchConversationMessages: async (conversationId: string, page = 1, limit = 50): Promise<{ messages: IMessage[], pagination: any }> => {
+    fetchConversationMessages: async (
+        conversationId: string,
+        page = 1,
+        limit = 50
+    ): Promise<{ messages: IMessage[]; pagination: IPagination }> => {
         try {
-            const res = await API.get(`/conversations/${conversationId}/messages`, { params: { page, limit } });
+            const res = await API.get(`/conversations/${conversationId}/messages`, {
+                params: { page, limit },
+            });
             return res.data.data;
         } catch (err) {
             return handleError(err);
         }
     },
 
-    addMessage: async (conversationId: string, content: string, sender: "visitor" | "bot" | "human" = "human"): Promise<IMessage> => {
+    // Mark all visitor/bot messages in a conversation as read
+    markMessagesAsRead: async (conversationId: string): Promise<void> => {
         try {
-            const res = await API.post("/conversations/message", { conversationId, content, sender });
-            return res.data.data.message;
+            await API.post(`/conversations/${conversationId}/read`);
         } catch (err) {
             return handleError(err);
         }
@@ -105,7 +114,12 @@ export const ConversationApi = {
         }
     },
 
-    sendPublicChatMessage: async (domainKey: string, content: string, visitorId?: string): Promise<{
+    // Public widget endpoints (no auth required)
+    sendPublicChatMessage: async (
+        domainKey: string,
+        content: string,
+        visitorId?: string
+    ): Promise<{
         message: IMessage;
         botResponse?: IMessage;
         visitorId: string;

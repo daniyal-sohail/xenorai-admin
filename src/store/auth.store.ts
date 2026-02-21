@@ -12,6 +12,8 @@ interface RegisterPayload {
 
 interface AuthState {
     user: IUser | null;
+    accessToken: string | null;
+    refreshToken: string | null;
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
@@ -39,6 +41,8 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
             user: null,
+            accessToken: null,
+            refreshToken: null,
             loading: false,
             error: null,
             isAuthenticated: false,
@@ -47,6 +51,8 @@ export const useAuthStore = create<AuthState>()(
             clearAuth: () =>
                 set({
                     user: null,
+                    accessToken: null,
+                    refreshToken: null,
                     isAuthenticated: false,
                     error: null,
                 }),
@@ -57,6 +63,8 @@ export const useAuthStore = create<AuthState>()(
                     const data: IAuthResponse = await AuthApi.register(payload);
                     set({
                         user: data.user,
+                        accessToken: data.accessToken,
+                        refreshToken: data.refreshToken,
                         isAuthenticated: true,
                     });
                 } catch (err) {
@@ -75,6 +83,8 @@ export const useAuthStore = create<AuthState>()(
                     const data: IAuthResponse = await AuthApi.login(email, password);
                     set({
                         user: data.user,
+                        accessToken: data.accessToken,
+                        refreshToken: data.refreshToken,
                         isAuthenticated: true,
                     });
                 } catch (err) {
@@ -93,6 +103,8 @@ export const useAuthStore = create<AuthState>()(
                     const data: IAuthResponse = await AuthApi.googleLogin(code);
                     set({
                         user: data.user,
+                        accessToken: data.accessToken,
+                        refreshToken: data.refreshToken,
                         isAuthenticated: true,
                     });
                 } catch (err) {

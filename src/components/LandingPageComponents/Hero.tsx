@@ -145,7 +145,7 @@ const HeroSection = () => {
                     <div
                         className='relative z-10 rounded-lg overflow-hidden   transition-all duration-300 mt-18'
                     >
-                        <img src="/one.png" alt="hero" className='w-full h-full object-cover' />
+                        <img src="/main2.png" alt="hero" className='w-full h-full object-cover' />
                         <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none z-10'></div>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo } from "react";
-import { MessageSquare, Bot, AlertCircle, XCircle } from "lucide-react";
+import { MessageSquare, Bot, AlertCircle } from "lucide-react";
 import { IConversationStats } from "./ConversationTypes";
 
 interface ConversationStatsCardProps {
@@ -32,13 +32,6 @@ const ConversationStatsCardComponent: FC<ConversationStatsCardProps> = ({ stats 
             icon: AlertCircle,
             iconStyle: { background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)", color: "#f97518" },
             valueStyle: { color: "#111827" },
-        },
-        {
-            label: "Closed",
-            value: stats.closed,
-            icon: XCircle,
-            iconStyle: { background: "#f9fafb", border: "1px solid #e5e7eb", color: "#9ca3af" },
-            valueStyle: { color: "#6b7280" },
         },
     ];
 
