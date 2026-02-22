@@ -4,6 +4,7 @@ import { FC, memo } from "react";
 import { Mail, Phone, Calendar, Edit2, Trash2, Globe } from "lucide-react";
 import { ILead } from "./LeadsTypes";
 import { IDomain } from "@/api/DomainApi";
+import { getLeadDisplayName } from "@/lib/leadName";
 
 interface LeadTableProps {
     leads: ILead[];
@@ -22,8 +23,8 @@ const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const getInitials = (lead: ILead) => {
-    if (lead.name) return lead.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-    return lead.email.charAt(0).toUpperCase();
+    const displayName = getLeadDisplayName(lead.name, lead.email);
+    return displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 };
 
 const ActionBtn: FC<{
@@ -159,7 +160,7 @@ const LeadTableComponent: FC<LeadTableProps> = ({
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="text-sm font-semibold text-gray-900 truncate leading-tight">
-                                                    {lead.name || "Anonymous Lead"}
+                                                    {getLeadDisplayName(lead.name, lead.email)}
                                                 </p>
                                                 <div className="flex items-center gap-1 mt-0.5">
                                                     <Mail size={10} className="text-gray-400" />

@@ -7,6 +7,7 @@ import {
     ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const Footer = () => {
     return (
@@ -41,15 +42,30 @@ const Footer = () => {
                         </p>
 
                         <div className="flex items-center gap-4">
-                            {[Facebook, Linkedin, Instagram, Send].map((Icon, i) => (
-                                <a
-                                    key={i}
-                                    href="#"
-                                    className="text-gray-600 hover:text-orange-500 transition-colors duration-300"
-                                >
-                                    <Icon size={18} />
-                                </a>
-                            ))}
+                            <a
+                                href="https://www.facebook.com/profile.php?id=61579221862576"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-gray-600 hover:text-orange-500 transition-colors duration-300"
+                            >
+                                <Facebook size={18} />
+                            </a>
+                            <a
+                                href="https://www.linkedin.com/company/devxcript/"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-gray-600 hover:text-orange-500 transition-colors duration-300"
+                            >
+                                <Linkedin size={18} />
+                            </a>
+                            <a
+                                href="https://www.instagram.com/devxcript"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-gray-600 hover:text-orange-500 transition-colors duration-300"
+                            >
+                                <Instagram size={18} />
+                            </a>
                         </div>
                     </div>
 
@@ -120,13 +136,18 @@ const Footer = () => {
                 <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden">
 
                     <p className="text-gray-500 text-sm text-center md:text-left">
-                        © 2025 Alwork. All rights reserved.
+                        © 2026 All rights reserved.
                     </p>
                     <p className="text-gray-500 text-sm">
                         Powered by{" "}
-                        <span className="text-gray-900 font-medium">
+                        <Link
+                            href="https://www.devxcript.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-gray-900 font-medium"
+                        >
                             DevXcript
-                        </span>
+                        </Link>
                     </p>
                 </div>
             </div>

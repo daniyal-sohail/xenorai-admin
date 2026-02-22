@@ -110,3 +110,14 @@ body {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out forwards;
 }
+
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -27,6 +27,10 @@ export const useUserStore = create<UserState>((set) => ({
             set({ loading: true, error: null });
             const user = await UserApi.getProfile();
             set({ user });
+
+            // Also update auth store to keep them in sync
+            const { useAuthStore } = await import("./auth.store");
+            useAuthStore.getState().setUser(user);
         } catch (err) {
             const message =
                 err instanceof Error ? err.message : "Failed to fetch profile";
@@ -39,8 +43,15 @@ export const useUserStore = create<UserState>((set) => ({
     updateProfile: async (data) => {
         try {
             set({ loading: true, error: null });
-            const updatedUser = await UserApi.updateProfile(data);
+            const updatedUser = await UserApi.updateProfile({
+                fullName: data.fullName,
+                profileImage: data.profileImage,
+            });
             set({ user: updatedUser });
+
+            // Also update auth store to keep them in sync
+            const { useAuthStore } = await import("./auth.store");
+            useAuthStore.getState().setUser(updatedUser);
         } catch (err) {
             const message =
                 err instanceof Error ? err.message : "Profile update failed";

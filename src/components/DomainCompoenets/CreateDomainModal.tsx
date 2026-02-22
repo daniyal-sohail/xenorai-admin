@@ -1,7 +1,7 @@
 "use client";
 
-import { FC, useState, useCallback } from "react";
-import { X, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
+import { FC, useState, useCallback, useRef } from "react";
+import { X, Sparkles, ChevronRight, ChevronLeft, Upload, Trash2 } from "lucide-react";
 import { ToneType, IndustryType } from "./DomainTypes";
 
 interface CreateDomainModalProps {
@@ -13,7 +13,7 @@ interface CreateDomainModalProps {
 export interface DomainFormData {
     domainName: string;
     botName: string;
-    botAvatar?: string;
+    botAvatar?: File;
     tone: ToneType;
     fallbackMessage: string;
     companyDescription?: string;
@@ -36,7 +36,7 @@ const INDUSTRIES: { value: IndustryType; label: string; emoji: string }[] = [
 const DEFAULT: DomainFormData = {
     domainName: "",
     botName: "",
-    botAvatar: "",
+    botAvatar: undefined,
     tone: "friendly",
     fallbackMessage: "Sorry, I couldn't understand that. Could you please rephrase?",
     companyDescription: "",
@@ -56,6 +56,8 @@ export const CreateDomainModal: FC<CreateDomainModalProps> = ({ isOpen, onClose,
     const [formData, setFormData] = useState<DomainFormData>(DEFAULT);
     const [step, setStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const set = useCallback(
         (field: keyof DomainFormData, value: any) =>
@@ -63,9 +65,33 @@ export const CreateDomainModal: FC<CreateDomainModalProps> = ({ isOpen, onClose,
         []
     );
 
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            set("botAvatar", file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    }, [set]);
+
+    const handleRemoveFile = useCallback(() => {
+        set("botAvatar", undefined);
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }, [set, previewUrl]);
+
     const handleClose = () => {
         setFormData(DEFAULT);
         setStep(0);
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
         onClose();
     };
 
@@ -76,6 +102,10 @@ export const CreateDomainModal: FC<CreateDomainModalProps> = ({ isOpen, onClose,
             await onSubmit(formData);
             setFormData(DEFAULT);
             setStep(0);
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                setPreviewUrl(null);
+            }
             onClose();
         } catch {
             // handled by parent
@@ -218,16 +248,53 @@ export const CreateDomainModal: FC<CreateDomainModalProps> = ({ isOpen, onClose,
                             {/* Bot avatar */}
                             <div>
                                 <label className={labelClass}>
-                                    Bot Avatar URL{" "}
+                                    Bot Avatar{" "}
                                     <span className="text-[#9ca3af] font-normal normal-case tracking-normal">(optional)</span>
                                 </label>
-                                <input
-                                    type="url"
-                                    placeholder="https://example.com/avatar.png"
-                                    value={formData.botAvatar}
-                                    onChange={(e) => set("botAvatar", e.target.value)}
-                                    className={inputClass}
-                                />
+
+                                {previewUrl ? (
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
+                                            style={{ border: "2px solid #e5e7eb" }}
+                                        >
+                                            <img
+                                                src={previewUrl}
+                                                alt="Avatar preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-sm text-[#6b7280]">
+                                            {formData.botAvatar?.name}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveFile}
+                                            className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                            style={{ color: "#ef4444" }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            id="botAvatar"
+                                        />
+                                        <label
+                                            htmlFor="botAvatar"
+                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-sm text-[#6b7280] hover:border-[#f97518] hover:bg-[#fff5ed] transition-all cursor-pointer"
+                                        >
+                                            <Upload size={16} />
+                                            Choose Image
+                                        </label>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Industry */}

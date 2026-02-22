@@ -217,8 +217,8 @@ const DomainRow: FC<{
                     <button
                         onClick={copyKey}
                         className={`flex-shrink-0 p-1 rounded-md transition-colors ${copied
-                                ? "text-emerald-600"
-                                : "text-gray-400 hover:text-gray-600"
+                            ? "text-emerald-600"
+                            : "text-gray-400 hover:text-gray-600"
                             }`}
                     >
                         {copied ? (

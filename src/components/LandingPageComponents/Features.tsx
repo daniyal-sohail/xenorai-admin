@@ -6,32 +6,37 @@ import Image from 'next/image';
 const Features = () => {
     const mainFeatures = [
         {
-            image: '/1.png', // Replace with your image
+            image: '/1.png',
             title: 'AI-Powered Chatbot',
             description: 'Engage visitors instantly with an intelligent chatbot that answers questions, qualifies leads, and drives conversions.',
+            alt: 'AI-powered chatbot interface showing intelligent conversations and lead qualification',
         },
         {
-            image: '/2.png', // Replace with your image
+            image: '/2.png',
             title: 'Multi-Domain Management',
             description: 'Manage chatbots across multiple websites from a single dashboard for seamless business operations.',
+            alt: 'Multi-domain chatbot management dashboard with centralized control panel',
         },
     ];
 
     const bottomFeatures = [
         {
-            image: '/3.png', // Replace with your image
+            image: '/3.png',
             title: 'Live Analytics & Reports',
             description: 'Track all conversations, lead generation, and revenue metrics in real-time with intuitive dashboards.',
+            alt: 'Real-time analytics dashboard showing conversation metrics, lead generation stats, and revenue tracking',
         },
         {
-            image: '/4.png', // Replace with your image
+            image: '/4.png',
             title: 'Voice & Multi-Language Support',
             description: 'Chat with customers in their preferred language or even through voice commands for a human-like experience.',
+            alt: 'Multi-language chatbot interface with voice command support in multiple languages',
         },
         {
-            image: '/5.png', // Replace with your image
+            image: '/5.png',
             title: 'Automated Email Campaigns',
             description: 'Collect emails from chats and run automated campaigns to nurture leads and drive sales.',
+            alt: 'Automated email campaign dashboard showing lead nurturing and email automation workflows',
         },
     ];
 
@@ -65,9 +70,7 @@ const Features = () => {
                     </p>
                 </div>
                 {/* Top Row - 2 Large Cards */}
-                <div className="grid relative grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div className="absolute inset-0  pointer-events-none z-0"></div>
-
+                <div className="grid relative grid-cols-1 lg:grid-cols-2 gap-6 mb-6 overflow-hidden">
                     {/* Decorative Background Shape */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 rounded-full opacity-10 blur-3xl pointer-events-none z-0"></div>
 
@@ -81,9 +84,10 @@ const Features = () => {
                                 <div className="aspect-[4/2] relative  rounded-xl overflow-hidden">
                                     <Image
                                         src={feature.image}
-                                        alt={feature.title}
+                                        alt={feature.alt}
                                         fill
                                         className="object-contain"
+                                        loading="lazy"
                                     />
 
                                     {/* Placeholder if no image */}
@@ -118,9 +122,10 @@ const Features = () => {
                                 <div className="aspect-[4/2] relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
                                     <Image
                                         src={feature.image}
-                                        alt={feature.title}
+                                        alt={feature.alt}
                                         fill
                                         className="object-cover"
+                                        loading="lazy"
                                     />
 
 

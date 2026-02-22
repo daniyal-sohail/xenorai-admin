@@ -3,6 +3,7 @@
 import { FC, useState, useCallback } from "react";
 import { Download } from "lucide-react";
 import { ILead } from "./LeadsTypes";
+import { getLeadDisplayName } from "@/lib/leadName";
 
 interface ExportLeadsButtonProps {
     leads: ILead[];
@@ -24,7 +25,7 @@ export const ExportLeadsButton: FC<ExportLeadsButtonProps> = ({
             leads.forEach((lead) => {
                 const row = [
                     `"${lead.email}"`,
-                    `"${lead.name || "N/A"}"`,
+                    `"${getLeadDisplayName(lead.name, lead.email)}"`,
                     `"${lead.phone || "N/A"}"`,
                     `"${new Date(lead.createdAt).toLocaleString()}"`,
                     `"${new Date(lead.updatedAt).toLocaleString()}"`,

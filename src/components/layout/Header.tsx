@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Bell, LogOut, Menu, User2 } from "lucide-react";
 import { useUIStore } from "@/store/sidebar.store";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useAuthStore } from "@/store/auth.store";
+import { getProfileImageUrl } from "@/lib/imageUrl";
 
 export default function Header() {
     const { toggleSidebar } = useUIStore();
@@ -78,8 +80,25 @@ export default function Header() {
                         onClick={() => setShowUserMenu(!showUserMenu)}
                         className="flex items-center gap-2 px-2 py-1.5 hover:bg-[rgb(var(--surface-muted))] rounded-md cursor-pointer transition-colors"
                     >
-                        <div className="w-7 h-7 bg-[rgb(var(--primary))] rounded-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-white">{getUserInitials()}</span>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden border border-[rgb(var(--border))] relative"
+                            style={{
+                                background: getProfileImageUrl(user?.profileImage) ? "transparent" : "rgb(var(--primary))",
+                            }}
+                        >
+                            {getProfileImageUrl(user?.profileImage) && (
+                                <Image
+                                    src={getProfileImageUrl(user?.profileImage)}
+                                    alt={user?.fullName || "Profile"}
+                                    fill
+                                    className="object-cover"
+                                    onError={() => {
+                                        // If image fails, the fallback will show
+                                    }}
+                                />
+                            )}
+                            {!getProfileImageUrl(user?.profileImage) && (
+                                <span className="text-xs font-medium text-white">{getUserInitials()}</span>
+                            )}
                         </div>
 
                         <div className="hidden sm:block text-left">

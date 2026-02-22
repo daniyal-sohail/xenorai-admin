@@ -5,6 +5,7 @@ import { Camera, Lock, User, Mail, Shield, Check, AlertCircle, X } from "lucide-
 import { Popup, PopupType } from "@/components/common/PopUp";
 import { useAuthStore } from "@/store/auth.store";
 import { useUserStore } from "@/store/user.store";
+import { getProfileImageUrl } from "@/lib/imageUrl";
 
 /* ============================
    FLOATING LABEL INPUT
@@ -321,13 +322,14 @@ const Toast = ({ open, type, message, onClose }: ToastProps) => {
 ============================ */
 export default function AccountPage() {
     const { user: authUser } = useAuthStore();
-    const { user, loading, updateProfile } = useUserStore();
+    const { user, loading, updateProfile, fetchProfile } = useUserStore();
     const [mounted, setMounted] = useState(false);
 
     // Profile state
     const [fullName, setFullName] = useState("");
     const [profileImage, setProfileImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Security state
@@ -352,14 +354,18 @@ export default function AccountPage() {
     const isGoogleUser = authUser?.authProvider === "google";
     const currentUser = user || authUser;
 
+    // Fetch fresh profile data on mount
     useEffect(() => {
+        fetchProfile();
         setTimeout(() => setMounted(true), 40);
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (currentUser) {
             setFullName(currentUser.fullName || "");
-            setPreviewUrl(currentUser.profileImage || null);
+            // Use the proper URL construction for existing profile images
+            setPreviewUrl(getProfileImageUrl(currentUser.profileImage) || null);
+            setImageFailedToLoad(false);
         }
     }, [currentUser]);
 
@@ -382,6 +388,7 @@ export default function AccountPage() {
         }
 
         setProfileImage(file);
+        setImageFailedToLoad(false);
         const reader = new FileReader();
         reader.onloadend = () => {
             setPreviewUrl(reader.result as string);
@@ -403,8 +410,21 @@ export default function AccountPage() {
                 fullName: fullName.trim(),
                 profileImage: profileImage || undefined,
             });
-            showToast("success", "Profile updated successfully!");
+
+            // After successful update, clear the file input and update preview from store
             setProfileImage(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
+            // Update preview URL from the updated user data
+            const updatedUser = useUserStore.getState().user;
+            if (updatedUser?.profileImage) {
+                setPreviewUrl(getProfileImageUrl(updatedUser.profileImage));
+            }
+            setImageFailedToLoad(false);
+
+            showToast("success", "Profile updated successfully!");
         } catch (err) {
             showToast("error", err instanceof Error ? err.message : "Failed to update profile");
         }
@@ -549,7 +569,7 @@ export default function AccountPage() {
                                         border: "4px solid rgb(var(--surface, 255 255 255))",
                                         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                                     }}>
-                                        {previewUrl ? (
+                                        {previewUrl && !imageFailedToLoad ? (
                                             <img
                                                 src={previewUrl}
                                                 alt="Profile"
@@ -558,9 +578,16 @@ export default function AccountPage() {
                                                     height: "100%",
                                                     objectFit: "cover",
                                                 }}
+                                                onError={() => {
+                                                    // If image fails to load, show initials
+                                                    setImageFailedToLoad(true);
+                                                }}
                                             />
-                                        ) : (
-                                            currentUser.fullName?.charAt(0).toUpperCase() || "U"
+                                        ) : null}
+                                        {(!previewUrl || imageFailedToLoad) && (
+                                            <span style={{ fontSize: "64px", fontWeight: 700 }}>
+                                                {currentUser.fullName?.charAt(0).toUpperCase() || "U"}
+                                            </span>
                                         )}
                                     </div>
                                     <button

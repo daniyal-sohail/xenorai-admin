@@ -26,10 +26,10 @@ export const navItems: NavItem[] = [
     { path: "/conversations", label: "Conversations", icon: MessageCircle }, // Chats
     { path: "/leads", label: "Leads", icon: Users },               // Leads
     { path: "/products", label: "Products", icon: Users },               // Leads
-    { path: "/bot-settings", label: "Bot Settings", icon: Cpu },   // Bot config
-    { path: "/support", label: "Support", icon: LifeBuoy },        // Help/support
     { path: "/account", label: "Account", icon: Settings },        // Account/profile
+    { path: "/support", label: "Support", icon: LifeBuoy },        // Help/support
     { path: "/plans", label: "Plans", icon: FileText },            // Plan info / limits
+    { path: "/bot-settings", label: "Bot Settings", icon: Cpu },   // Bot config
 ];
 
 export default function Sidebar() {

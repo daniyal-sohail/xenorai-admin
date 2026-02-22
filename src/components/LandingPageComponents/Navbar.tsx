@@ -52,8 +52,8 @@ const Navbar: React.FC = () => {
                             <Image
                                 src="/logo.png"   // put your icon here
                                 alt="Logo"
-                                width={50}
-                                height={50}
+                                width={64}
+                                height={64}
                                 className="object-contain"
                                 priority
                             />

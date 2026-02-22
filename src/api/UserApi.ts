@@ -37,7 +37,7 @@ export const UserApi = {
 
     updateProfile: async (data: {
         fullName?: string;
-        profileImg?: File;
+        profileImage?: File;
     }): Promise<IUser> => {
         try {
             const formData = new FormData();
@@ -46,12 +46,13 @@ export const UserApi = {
                 formData.append("fullName", data.fullName);
             }
 
-            if (data.profileImg) {
-                formData.append("profileImg", data.profileImg);
+            if (data.profileImage) {
+                formData.append("profileImage", data.profileImage);
             }
 
-            // Don't set Content-Type for FormData - axios will set it automatically with boundary
-            const res = await API.patch("/users/profile", formData);
+            const res = await API.patch("/users/profile", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
 
             return res.data.data.user;
         } catch (error) {

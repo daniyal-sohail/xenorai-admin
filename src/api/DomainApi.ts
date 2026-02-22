@@ -29,7 +29,7 @@ export interface IDomainWithScript {
 interface CreateDomainPayload {
     domainName: string;
     botName?: string;
-    botAvatar?: string;
+    botAvatar?: File;
     tone?: ToneType;
     fallbackMessage?: string;
     companyDescription?: string;
@@ -38,7 +38,7 @@ interface CreateDomainPayload {
 
 interface UpdateDomainPayload {
     botName?: string;
-    botAvatar?: string | null;
+    botAvatar?: File | null;
     tone?: ToneType;
     fallbackMessage?: string;
     companyDescription?: string;
@@ -69,7 +69,18 @@ const handleError = (error: unknown): never => {
 export const DomainApi = {
     create: async (payload: CreateDomainPayload): Promise<IDomain> => {
         try {
-            const res = await API.post("/domains", payload);
+            const formData = new FormData();
+            formData.append("domainName", payload.domainName);
+            if (payload.botName) formData.append("botName", payload.botName);
+            if (payload.tone) formData.append("tone", payload.tone);
+            if (payload.fallbackMessage) formData.append("fallbackMessage", payload.fallbackMessage);
+            if (payload.companyDescription) formData.append("companyDescription", payload.companyDescription);
+            if (payload.industryType) formData.append("industryType", payload.industryType);
+            if (payload.botAvatar instanceof File) formData.append("botAvatar", payload.botAvatar);
+
+            const res = await API.post("/domains", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             return res.data.data.domain;
         } catch (error) {
             return handleError(error);
@@ -99,7 +110,20 @@ export const DomainApi = {
         payload: UpdateDomainPayload
     ): Promise<IDomain> => {
         try {
-            const res = await API.put(`/domains/${domainId}`, payload);
+            const formData = new FormData();
+            if (payload.botName !== undefined) formData.append("botName", payload.botName);
+            if (payload.tone) formData.append("tone", payload.tone);
+            if (payload.fallbackMessage !== undefined) formData.append("fallbackMessage", payload.fallbackMessage);
+            if (payload.companyDescription !== undefined) formData.append("companyDescription", payload.companyDescription);
+            if (payload.industryType) formData.append("industryType", payload.industryType);
+            if (payload.botAvatar instanceof File) {
+                formData.append("botAvatar", payload.botAvatar);
+            }
+            // If botAvatar is explicitly null, don't send it (keeps existing)
+
+            const res = await API.put(`/domains/${domainId}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             return res.data.data.domain;
         } catch (error) {
             return handleError(error);

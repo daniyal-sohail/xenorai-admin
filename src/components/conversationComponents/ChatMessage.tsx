@@ -11,85 +11,196 @@ interface ChatMessageProps {
 const formatTime = (dateString: string) =>
     new Date(dateString).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
-const ChatMessageComponent: FC<ChatMessageProps> = ({ message }) => {
-    const isVisitor = message.sender === "visitor";
-    const isBot = message.sender === "bot";
-    const isHuman = message.sender === "human";
+const SENDER_CONFIG = {
+    bot: {
+        label: "AI",
+        Icon: Bot,
+        color: "#059669",
+        iconBg: "rgba(5,150,105,0.1)",
+        iconBorder: "rgba(5,150,105,0.2)",
+        bubbleBg: "rgba(5,150,105,0.06)",
+        bubbleBorder: "rgba(5,150,105,0.15)",
+        avatarBg: "rgba(5,150,105,0.1)",
+        avatarBorder: "rgba(5,150,105,0.2)",
+    },
+    human: {
+        label: "You",
+        Icon: Headset,
+        color: "#f97518",
+        iconBg: "rgba(249,117,24,0.08)",
+        iconBorder: "rgba(249,117,24,0.2)",
+        bubbleBg: "rgba(249,117,24,0.06)",
+        bubbleBorder: "rgba(249,117,24,0.15)",
+        avatarBg: "rgba(249,117,24,0.1)",
+        avatarBorder: "rgba(249,117,24,0.2)",
+    },
+    visitor: {
+        label: "Visitor",
+        Icon: User,
+        color: "#6b7280",
+        iconBg: "#f3f4f6",
+        iconBorder: "#e5e7eb",
+        bubbleBg: "#fff",
+        bubbleBorder: "#e5e7eb",
+        avatarBg: "#f3f4f6",
+        avatarBorder: "#e5e7eb",
+    },
+} as const;
 
-    const senderConfig = isBot
-        ? { label: "AI", icon: Bot, color: "#059669", bgIcon: "rgba(52,211,153,0.1)", borderIcon: "1px solid rgba(52,211,153,0.2)" }
-        : isHuman
-            ? { label: "You", icon: Headset, color: "#f97518", bgIcon: "rgba(249,117,24,0.08)", borderIcon: "1px solid rgba(249,117,24,0.2)" }
-            : { label: "Visitor", icon: User, color: "#6b7280", bgIcon: "#f9fafb", borderIcon: "1px solid #e5e7eb" };
+const ChatMessageComponent: FC<ChatMessageProps> = ({ message }) => {
+    const sender = (message.sender as keyof typeof SENDER_CONFIG) in SENDER_CONFIG
+        ? (message.sender as keyof typeof SENDER_CONFIG)
+        : "visitor";
+    const config = SENDER_CONFIG[sender];
+    const isVisitor = sender === "visitor";
 
     return (
-        <div className={`flex gap-2.5 mb-4 ${!isVisitor ? "justify-end" : ""}`}>
+        <div
+            style={{
+                display: "flex",
+                gap: 10,
+                marginBottom: 16,
+                justifyContent: isVisitor ? "flex-start" : "flex-end",
+                alignItems: "flex-end",
+            }}
+        >
+            {/* Visitor avatar — left */}
             {isVisitor && (
                 <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "#f9fafb", border: "1px solid #e5e7eb" }}
+                    style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 10,
+                        background: config.avatarBg,
+                        border: `1px solid ${config.avatarBorder}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        marginBottom: 2,
+                    }}
                 >
-                    <User size={14} className="text-gray-500" />
+                    <config.Icon size={14} color={config.color} />
                 </div>
             )}
 
-            <div className={`max-w-[70%] ${!isVisitor ? "order-first" : ""}`}>
+            <div
+                style={{
+                    maxWidth: "68%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                    alignItems: isVisitor ? "flex-start" : "flex-end",
+                }}
+            >
                 {/* Sender label */}
-                <div className={`flex items-center gap-1 mb-1 ${!isVisitor ? "justify-end" : ""}`}>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        flexDirection: isVisitor ? "row" : "row-reverse",
+                    }}
+                >
                     <div
-                        className="w-4 h-4 rounded-md flex items-center justify-center"
-                        style={{ background: senderConfig.bgIcon, border: senderConfig.borderIcon }}
+                        style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 5,
+                            background: config.iconBg,
+                            border: `1px solid ${config.iconBorder}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
                     >
-                        <senderConfig.icon size={10} style={{ color: senderConfig.color }} />
+                        <config.Icon size={9} color={config.color} />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: senderConfig.color }}>
-                        {senderConfig.label}
+                    <span
+                        style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.07em",
+                            color: config.color,
+                        }}
+                    >
+                        {config.label}
                     </span>
                 </div>
 
                 {/* Bubble */}
                 <div
-                    className="rounded-2xl px-4 py-2.5"
-                    style={
-                        isVisitor
-                            ? { background: "#fff", border: "1px solid #e5e7eb", borderTopLeftRadius: 6 }
-                            : isBot
-                                ? { background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)", borderTopRightRadius: 6 }
-                                : { background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.15)", borderTopRightRadius: 6 }
-                    }
+                    style={{
+                        background: config.bubbleBg,
+                        border: `1px solid ${config.bubbleBorder}`,
+                        borderRadius: 16,
+                        borderTopLeftRadius: isVisitor ? 4 : 16,
+                        borderTopRightRadius: isVisitor ? 16 : 4,
+                        padding: "10px 14px",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                    }}
                 >
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap break-words leading-relaxed">
+                    <p
+                        style={{
+                            fontSize: 13.5,
+                            color: "#1f2937",
+                            margin: 0,
+                            lineHeight: 1.6,
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                        }}
+                    >
                         {message.content}
                     </p>
 
-                    {/* Metadata */}
-                    {message.meta && Object.keys(message.meta).length > 0 && (
-                        <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-                            {message.meta.products && message.meta.products.length > 0 && (
-                                <p className="text-xs text-gray-500">
-                                    🛍️ Recommended: {message.meta.products.join(", ")}
-                                </p>
-                            )}
+                    {/* Products metadata */}
+                    {message.meta?.products && message.meta.products.length > 0 && (
+                        <div
+                            style={{
+                                marginTop: 8,
+                                paddingTop: 8,
+                                borderTop: "1px solid rgba(0,0,0,0.06)",
+                            }}
+                        >
+                            <p style={{ fontSize: 11, color: "#6b7280", margin: 0 }}>
+                                🛍️ Recommended: {message.meta.products.join(", ")}
+                            </p>
                         </div>
                     )}
 
                     {/* Timestamp */}
-                    <div className="flex items-center justify-end mt-1.5">
-                        <span className="text-[10px] text-gray-400">{formatTime(message.createdAt)}</span>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginTop: 6,
+                        }}
+                    >
+                        <span style={{ fontSize: 10, color: "#b0b7c3", letterSpacing: "0.01em" }}>
+                            {formatTime(message.createdAt)}
+                        </span>
                     </div>
                 </div>
             </div>
 
+            {/* Non-visitor avatar — right */}
             {!isVisitor && (
                 <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={
-                        isBot
-                            ? { background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)" }
-                            : { background: "rgba(249,117,24,0.08)", border: "1px solid rgba(249,117,24,0.2)" }
-                    }
+                    style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 10,
+                        background: config.avatarBg,
+                        border: `1px solid ${config.avatarBorder}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        marginBottom: 2,
+                    }}
                 >
-                    {isBot ? <Bot size={14} style={{ color: "#059669" }} /> : <Headset size={14} style={{ color: "#f97518" }} />}
+                    <config.Icon size={14} color={config.color} />
                 </div>
             )}
         </div>

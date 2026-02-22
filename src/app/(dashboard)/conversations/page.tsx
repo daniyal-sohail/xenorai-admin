@@ -8,13 +8,12 @@ import { useAuthStore } from "@/store/auth.store";
 import { IConversation, IMessage } from "@/api/ConversationsApi";
 import { useConversationFilters } from "@/components/conversationComponents/useConversationsFilters";
 import { useSocket } from "@/components/conversationComponents/useSocket";
-import { ConversationStatsCard } from "@/components/conversationComponents/ConversationStatsCard";
+import { ConversationHeader } from "@/components/conversationComponents/ConversationHeader";
 import { ConversationFilters } from "@/components/conversationComponents/ConversationFilters";
 import { ConversationListSkeleton } from "@/components/conversationComponents/ConversationSkeleton";
 import { ConversationListItem } from "@/components/conversationComponents/ConversationListitems";
 import { ChatWindow } from "@/components/conversationComponents/ChatWindow";
 import { Popup, PopupType } from "@/components/common/PopUp";
-import { DomainSelector } from "@/components/leadsComponents/DomainSelector";
 
 export default function ConversationsPage() {
     const {
@@ -199,120 +198,72 @@ export default function ConversationsPage() {
         showToast("success", enabled ? "AI enabled" : "AI disabled — you can now reply manually");
     }, [selectedConversation, selectedDomainId, toggleAI, showToast]);
 
-    const handleRefresh = useCallback(() => {
-        if (selectedDomainId) {
-            fetchConversations({ domainId: selectedDomainId, limit: 100 });
-            fetchStats(selectedDomainId);
-            showToast("success", "Conversations refreshed");
-        }
-    }, [selectedDomainId, fetchConversations, fetchStats, showToast]);
+
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                                    <MessageSquare size={28} className="text-indigo-600" />
-                                    Live Conversations
-                                </h1>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Chat with your website visitors in real-time
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {isConnected ? (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full">
-                                        <Wifi size={14} />
-                                        <span className="text-xs font-medium">Connected</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-full">
-                                        <WifiOff size={14} />
-                                        <span className="text-xs font-medium">Disconnected</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleRefresh}
-                            disabled={loading || !selectedDomainId}
-                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                        >
-                            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div className=" flex flex-col">
 
             {/* Content */}
             <div className="flex-1 overflow-hidden">
-                <div className="h-full px-4 sm:px-6 lg:px-8 py-6">
-                    <DomainSelector
+                <div className="h-full px-4 sm:px-4 lg:px-4 py-0">
+                    <ConversationHeader
                         domains={domains}
                         selectedDomainId={selectedDomainId}
                         onDomainChange={handleDomainChange}
+                        stats={stats}
                     />
 
                     {selectedDomainId && (
-                        <>
-                            <ConversationStatsCard stats={stats} />
-
-                            <div
-                                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-                                style={{ height: "calc(100vh - 340px)" }}
-                            >
-                                <div className="flex h-full">
-                                    {/* Sidebar */}
-                                    <div className="w-96 border-r border-gray-200 flex flex-col">
-                                        <ConversationFilters
-                                            filters={filters}
-                                            onFilterChange={handleFilterChange}
-                                        />
-                                        <div className="flex-1 overflow-y-auto">
-                                            {loading ? (
-                                                <ConversationListSkeleton count={5} />
-                                            ) : filteredConversations.length === 0 ? (
-                                                <div className="flex items-center justify-center h-full p-6">
-                                                    <div className="text-center">
-                                                        <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />
-                                                        <p className="text-gray-600">
-                                                            {hasActiveFilters
-                                                                ? "No conversations match your filters"
-                                                                : "No conversations yet"}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                filteredConversations.map((conv) => (
-                                                    <ConversationListItem
-                                                        key={conv._id}
-                                                        conversation={conv}
-                                                        isSelected={selectedConversation?._id === conv._id}
-                                                        unreadCount={unreadCounts[conv._id] || 0}
-                                                        onClick={handleConversationSelect}
-                                                    />
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Chat Window */}
-                                    <ChatWindow
-                                        conversation={selectedConversation}
-                                        messages={messages}
-                                        isLoading={messagesLoading}
-                                        onSendMessage={handleSendMessage}
-                                        onToggleAI={handleToggleAI}
-                                        isSending={isSending}
+                        <div
+                            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                            style={{ height: "calc(100vh - 200px)" }}
+                        >
+                            <div className="flex h-full">
+                                {/* Sidebar */}
+                                <div className="w-96 border-r border-gray-200 flex flex-col">
+                                    <ConversationFilters
+                                        filters={filters}
+                                        onFilterChange={handleFilterChange}
                                     />
+                                    <div className="flex-1 overflow-y-auto">
+                                        {loading ? (
+                                            <ConversationListSkeleton count={5} />
+                                        ) : filteredConversations.length === 0 ? (
+                                            <div className="flex items-center justify-center h-full p-6">
+                                                <div className="text-center">
+                                                    <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />
+                                                    <p className="text-gray-600">
+                                                        {hasActiveFilters
+                                                            ? "No conversations match your filters"
+                                                            : "No conversations yet"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            filteredConversations.map((conv) => (
+                                                <ConversationListItem
+                                                    key={conv._id}
+                                                    conversation={conv}
+                                                    isSelected={selectedConversation?._id === conv._id}
+                                                    unreadCount={unreadCounts[conv._id] || 0}
+                                                    onClick={handleConversationSelect}
+                                                />
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Chat Window */}
+                                <ChatWindow
+                                    conversation={selectedConversation}
+                                    messages={messages}
+                                    isLoading={messagesLoading}
+                                    onSendMessage={handleSendMessage}
+                                    onToggleAI={handleToggleAI}
+                                    isSending={isSending}
+                                />
                             </div>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

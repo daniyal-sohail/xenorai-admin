@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Globe } from "lucide-react";
 import { useDomainStore } from "@/store/domain.store";
 import { IDomain } from "@/api/DomainApi";
@@ -10,26 +11,23 @@ import { CreateDomainModal, DomainFormData } from "@/components/DomainCompoenets
 import { EditDomainModal, UpdateDomainData } from "@/components/DomainCompoenets/EditDomainModal";
 import { DomainFilters } from "@/components/DomainCompoenets/DomainFilter";
 import { DomainTable } from "@/components/DomainCompoenets/DomainTable";
-import { DomainDetail } from "@/components/DomainCompoenets/DomainDetail";
 import { DeleteConfirmModal } from "@/components/DomainCompoenets/DomainConfirmModal";
 import { DomainSkeletonGrid } from "@/components/DomainCompoenets/DomainSkeleton";
 import { EmptyState } from "@/components/DomainCompoenets/EmptyState";
 import { Pagination } from "@/components/DomainCompoenets/Pagination";
 
-type View = "list" | "detail";
-
-export default function DashboardPage() {
+export default function DomainsPage() {
+    const router = useRouter();
     const {
         domains, loading, error,
         fetchDomains, createDomain, updateDomain, deleteDomain,
-        toggleBotStatus, fetchDomainById, botScript,
+        toggleBotStatus,
     } = useDomainStore();
 
-    const [view, setView] = useState<View>("list");
-    const [selectedDomain, setSelectedDomain] = useState<IDomain | null>(null);
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedDomain, setSelectedDomain] = useState<IDomain | null>(null);
     const [domainToDelete, setDomainToDelete] = useState<string | null>(null);
 
     const [toast, setToast] = useState<{ open: boolean; type: PopupType; message: string }>({
@@ -44,7 +42,7 @@ export default function DashboardPage() {
         useDomainFilters(domains);
 
     useEffect(() => { fetchDomains(); }, [fetchDomains]);
-    useEffect(() => { if (error) showToast("error", error); }, [error]);
+    useEffect(() => { if (error) showToast("error", error); }, [error, showToast]);
 
     const handleCreate = useCallback(async (data: DomainFormData) => {
         await createDomain(data);
@@ -65,8 +63,7 @@ export default function DashboardPage() {
         showToast("success", "Domain deleted.");
         setDeleteModalOpen(false);
         setDomainToDelete(null);
-        if (view === "detail") { setView("list"); setSelectedDomain(null); }
-    }, [deleteDomain, domainToDelete, showToast, view]);
+    }, [deleteDomain, domainToDelete, showToast]);
 
     const handleToggle = useCallback(async (id: string) => {
         await toggleBotStatus(id);
@@ -74,11 +71,9 @@ export default function DashboardPage() {
         showToast("success", `Bot ${!d?.botEnabled ? "enabled" : "disabled"}.`);
     }, [toggleBotStatus, domains, showToast]);
 
-    const handleViewDetail = useCallback(async (domain: IDomain) => {
-        setSelectedDomain(domain);
-        await fetchDomainById(domain._id);
-        setView("detail");
-    }, [fetchDomainById]);
+    const handleViewDetail = useCallback((domain: IDomain) => {
+        router.push(`/domains/${domain._id}`);
+    }, [router]);
 
     const openEdit = useCallback((domain: IDomain) => {
         setSelectedDomain(domain);
@@ -89,36 +84,6 @@ export default function DashboardPage() {
         setDomainToDelete(id);
         setDeleteModalOpen(true);
     }, []);
-
-    // ── Detail view ──────────────────────────────────────────────────────────────
-    if (view === "detail" && selectedDomain) {
-        return (
-            <>
-                <DomainDetail
-                    domain={selectedDomain}
-                    script={botScript}
-                    onBack={() => { setView("list"); setSelectedDomain(null); }}
-                    onEdit={openEdit}
-                    onDelete={openDelete}
-                    onToggle={handleToggle}
-                />
-                <EditDomainModal
-                    isOpen={editModalOpen}
-                    domain={selectedDomain}
-                    onClose={() => { setEditModalOpen(false); setSelectedDomain(null); }}
-                    onSubmit={handleEdit}
-                />
-                <DeleteConfirmModal
-                    isOpen={deleteModalOpen}
-                    domainName={domains.find((d) => d._id === domainToDelete)?.domainName || ""}
-                    onClose={() => { setDeleteModalOpen(false); setDomainToDelete(null); }}
-                    onConfirm={handleDelete}
-                />
-                <Popup open={toast.open} type={toast.type} message={toast.message}
-                    onClose={() => setToast((t) => ({ ...t, open: false }))} />
-            </>
-        );
-    }
 
     // ── List view ────────────────────────────────────────────────────────────────
     return (
@@ -150,7 +115,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Content */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-6xl mx-auto py-8">
                 {/* Filters */}
                 {domains.length > 0 && (
                     <DomainFilters filters={filters} onFilterChange={handleFilterChange} />

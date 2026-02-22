@@ -36,7 +36,8 @@ const HeroSection = () => {
             {/* Decorative Background Shape */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 rounded-full opacity-30 blur-3xl pointer-events-none z-0"></div>
 
-            <div className="max-w-7xl mx-auto px-6 pt-40 relative z-10">
+            <div className="max-w-7xl mx-auto px-6 pt-40 relat
+            ive z-10">
                 {/* Badge */}
                 <div
                     className={`flex cursor-pointer justify-center mb-2 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
@@ -73,7 +74,7 @@ const HeroSection = () => {
                 </div>
 
                 {/* CTA Button */}
-                <form onSubmit={handleSubmit} className="mx-auto mt-10 mb-20 max-w-xl  relative mb-2">
+                <form onSubmit={handleSubmit} className="mx-auto mt-10 mb-20 max-w-xl relative">
                     <input
                         id="email"
                         type="email"
@@ -81,12 +82,12 @@ const HeroSection = () => {
                         required
                         placeholder="Enter your email"
                         disabled={state.submitting}
-                        className="w-full rounded-full border border-gray-200 bg-white px-6 py-4 pr-48 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/60 disabled:opacity-50"
+                        className="w-full rounded-full border border-gray-200 bg-white px-6 py-4 sm:pr-48 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/60 disabled:opacity-50"
                     />
                     <button
                         type="submit"
                         disabled={state.submitting}
-                        className="group absolute right-2 top-1/2 -translate-y-1/2 bg-[#F97518] text-white rounded-full py-2 px-4 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="group mt-3 w-full bg-[#F97518] text-white rounded-full py-2 px-4 cursor-pointer shadow-lg flex justify-center items-center hover:bg-[#e86b13] hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed sm:mt-0 sm:w-auto sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2"
                     >
                         <span className="mr-2 text-[16px] whitespace-nowrap">
                             {state.submitting ? 'Submitting...' : 'Get Early Access'}
@@ -143,10 +144,16 @@ const HeroSection = () => {
                 >
                     {/* Image */}
                     <div
-                        className='relative z-10 rounded-lg overflow-hidden   transition-all duration-300 mt-18'
+
+                        className='relative w-full '
                     >
-                        <img src="/main2.png" alt="hero" className='w-full h-full object-cover' />
-                        <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none z-10'></div>
+                        {/* Image */}
+                        <div
+                            className='relative z-10 rounded-lg overflow-hidden   transition-all duration-300 mt-18'
+                        >
+                            <img src="/main2.png" alt="hero" className='w-full h-full object-cover' />
+                            <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none z-10'></div>
+                        </div>
                     </div>
                 </div>
             </div>

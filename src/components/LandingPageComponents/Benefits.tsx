@@ -65,10 +65,7 @@ const Benefits = () => {
 
     return (
         <section id="benefits" className="py-10 md:py-20">
-            < div className="max-w-7xl relative mx-auto px-6" >
-
-                <div className="absolute inset-0 pointer-events-none z-0"></div>
-
+            < div className="max-w-7xl relative mx-auto px-6 overflow-hidden" >
                 {/* Decorative Background Shape */}
                 <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-500 rounded-full opacity-15 blur-3xl pointer-events-none z-0"></div>
 

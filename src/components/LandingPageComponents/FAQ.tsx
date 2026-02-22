@@ -39,7 +39,7 @@ const FAQ = () => {
 
     return (
         <section id="faq" className="py-10 md:py-20">
-            <div className="max-w-7xl mx-auto px-6">
+            <div className="max-w-7xl mx-auto px-6 overflow-hidden">
                 <div className="grid relative grid-cols-1 lg:grid-cols-[40%_55%] gap-16 items-start">
                     {/* Left Column - Header */}
                     <div>
@@ -85,7 +85,6 @@ const FAQ = () => {
 
 
                     </div>
-                    <div className="absolute inset-0 pointer-events-none z-0"></div>
 
                     {/* Decorative Background Shape */}
                     <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-500 rounded-full opacity-15 blur-3xl pointer-events-none z-0"></div>

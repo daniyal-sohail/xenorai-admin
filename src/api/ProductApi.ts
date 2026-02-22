@@ -68,7 +68,6 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const formData = new FormData();
-            formData.append("domainId", domainId);
             formData.append("name", data.name);
             formData.append("price", String(data.price));
 
@@ -141,7 +140,6 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const formData = new FormData();
-            formData.append("domainId", domainId);
             Object.entries(data).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
                     formData.append(key, value as any);
@@ -177,8 +175,7 @@ export const ProductApi = {
     ): Promise<IProduct> => {
         try {
             const res = await API.patch(
-                `/products/${domainId}/products/${productId}/toggle`,
-                { domainId }
+                `/products/${domainId}/products/${productId}/toggle`
             );
             return res.data.data.product;
         } catch (error) {

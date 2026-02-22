@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useCallback } from "react";
+import { FC, useState, useCallback, useEffect } from "react";
 import {
     ArrowLeft,
     Copy,
@@ -14,8 +14,16 @@ import {
     Activity,
     MessageSquare,
     Building2,
+    Plus,
 } from "lucide-react";
 import { IDomain } from "./DomainTypes";
+import { useProductStore } from "@/store/product.store";
+import { IProduct } from "@/api/ProductApi";
+import { ProductFormData } from "@/components/productComponents/ProductTypes";
+import { CreateProductModal } from "@/components/productComponents/CreateProductModal";
+import { EditProductModal } from "@/components/productComponents/EditProductModal";
+import { ProductTable } from "@/components/productComponents/ProductTable";
+import { DeleteConfirmModal } from "./DomainConfirmModal";
 
 interface DomainDetailProps {
     domain: IDomain;
@@ -55,6 +63,28 @@ export const DomainDetail: FC<DomainDetailProps> = ({
     const [keyCopied, setKeyCopied] = useState(false);
     const [scriptCopied, setScriptCopied] = useState(false);
 
+    // Product management
+    const {
+        products,
+        loading: productsLoading,
+        fetchProducts,
+        createProduct,
+        updateProduct,
+        deleteProduct,
+        toggleProductStatus,
+    } = useProductStore();
+
+    const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
+    const [editProductModalOpen, setEditProductModalOpen] = useState(false);
+    const [deleteProductModalOpen, setDeleteProductModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+    const [productToDelete, setProductToDelete] = useState<string | null>(null);
+
+    // Fetch products on mount
+    useEffect(() => {
+        fetchProducts(domain._id);
+    }, [domain._id, fetchProducts]);
+
     const copyKey = useCallback(async () => {
         await navigator.clipboard.writeText(domain.domainKey);
         setKeyCopied(true);
@@ -68,12 +98,69 @@ export const DomainDetail: FC<DomainDetailProps> = ({
         setTimeout(() => setScriptCopied(false), 2000);
     }, [script]);
 
+    const handleCreateProduct = useCallback(
+        async (data: ProductFormData) => {
+            try {
+                await createProduct(domain._id, data);
+                setCreateProductModalOpen(false);
+            } catch (err) {
+                // Handle error
+            }
+        },
+        [domain._id, createProduct]
+    );
+
+    const handleEditProduct = useCallback(
+        async (id: string, data: Partial<ProductFormData>) => {
+            try {
+                await updateProduct(domain._id, id, data);
+                setEditProductModalOpen(false);
+                setSelectedProduct(null);
+            } catch (err) {
+                // Handle error
+            }
+        },
+        [domain._id, updateProduct]
+    );
+
+    const handleDeleteProduct = useCallback(async () => {
+        if (!productToDelete) return;
+        try {
+            await deleteProduct(domain._id, productToDelete);
+            setDeleteProductModalOpen(false);
+            setProductToDelete(null);
+        } catch (err) {
+            // Handle error
+        }
+    }, [domain._id, productToDelete, deleteProduct]);
+
+    const handleToggleProduct = useCallback(
+        async (productId: string) => {
+            try {
+                await toggleProductStatus(domain._id, productId);
+            } catch (err) {
+                // Handle error
+            }
+        },
+        [domain._id, toggleProductStatus]
+    );
+
+    const handleOpenEditModal = useCallback((product: IProduct) => {
+        setSelectedProduct(product);
+        setEditProductModalOpen(true);
+    }, []);
+
+    const handleOpenDeleteModal = useCallback((productId: string) => {
+        setProductToDelete(productId);
+        setDeleteProductModalOpen(true);
+    }, []);
+
     const tone = toneStyles[domain.tone];
 
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Top Bar */}
-            <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
+            <div className="z-20 bg-white border-b border-gray-200">
                 <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button
@@ -103,8 +190,8 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                         <button
                             onClick={() => onToggle(domain._id)}
                             className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl transition ${domain.botEnabled
-                                    ? "border border-gray-200 text-gray-600 bg-white hover:bg-gray-100"
-                                    : "bg-[#f97518] text-white shadow-sm hover:opacity-90"
+                                ? "border border-gray-200 text-gray-600 bg-white hover:bg-gray-100"
+                                : "bg-[#f97518] text-white shadow-sm hover:opacity-90"
                                 }`}
                         >
                             <Power size={14} />
@@ -126,8 +213,8 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex gap-5">
                     <div
                         className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold ${domain.botEnabled
-                                ? "bg-gradient-to-br from-[#f97518] to-[#ea5a00] text-white shadow-md"
-                                : "bg-gray-100 text-gray-500 border border-gray-200"
+                            ? "bg-gradient-to-br from-[#f97518] to-[#ea5a00] text-white shadow-md"
+                            : "bg-gray-100 text-gray-500 border border-gray-200"
                             }`}
                     >
                         {domain.botName.charAt(0).toUpperCase()}
@@ -153,8 +240,8 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                         <div className="flex gap-2 mt-4 flex-wrap">
                             <span
                                 className={`px-2.5 py-1 rounded-full text-xs font-semibold ${domain.botEnabled
-                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                                        : "bg-gray-100 text-gray-500 border border-gray-200"
+                                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                    : "bg-gray-100 text-gray-500 border border-gray-200"
                                     }`}
                             >
                                 {domain.botEnabled ? "Active" : "Disabled"}
@@ -188,8 +275,8 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                             <button
                                 onClick={copyKey}
                                 className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition ${keyCopied
-                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                                        : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                    : "border border-gray-200 text-gray-600 hover:bg-gray-100"
                                     }`}
                             >
                                 {keyCopied ? <Check size={12} /> : <Copy size={12} />}
@@ -228,8 +315,8 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                             onClick={copyScript}
                             disabled={!script}
                             className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition ${scriptCopied
-                                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                                    : "bg-[#f97518] text-white hover:opacity-90"
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                : "bg-[#f97518] text-white hover:opacity-90"
                                 }`}
                         >
                             {scriptCopied ? <Check size={12} /> : <Copy size={12} />}
@@ -246,6 +333,43 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                             <div className="p-6 text-center text-gray-400 text-sm">
                                 Loading script…
                             </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Products Section */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h2 className="text-sm font-semibold text-gray-800">
+                            Products
+                        </h2>
+
+                        <button
+                            onClick={() => setCreateProductModalOpen(true)}
+                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-[#f97518] text-white rounded-xl hover:opacity-90 transition"
+                        >
+                            <Plus size={14} />
+                            Add Product
+                        </button>
+                    </div>
+
+                    <div className="p-6">
+                        {productsLoading ? (
+                            <div className="text-center py-8 text-gray-400">
+                                Loading products…
+                            </div>
+                        ) : products.length === 0 ? (
+                            <div className="text-center py-8 text-gray-400">
+                                <p className="text-sm">No products yet. Add one to get started!</p>
+                            </div>
+                        ) : (
+                            <ProductTable
+                                products={products}
+                                loading={productsLoading}
+                                onEdit={handleOpenEditModal}
+                                onDelete={handleOpenDeleteModal}
+                                onToggle={handleToggleProduct}
+                            />
                         )}
                     </div>
                 </div>
@@ -267,6 +391,35 @@ export const DomainDetail: FC<DomainDetailProps> = ({
                     </button>
                 </div>
             </div>
+
+            {/* Product Modals */}
+            <CreateProductModal
+                isOpen={createProductModalOpen}
+                onClose={() => setCreateProductModalOpen(false)}
+                onSubmit={handleCreateProduct}
+            />
+
+            <EditProductModal
+                isOpen={editProductModalOpen}
+                product={selectedProduct}
+                onClose={() => {
+                    setEditProductModalOpen(false);
+                    setSelectedProduct(null);
+                }}
+                onSubmit={handleEditProduct}
+            />
+
+            <DeleteConfirmModal
+                isOpen={deleteProductModalOpen}
+                domainName={
+                    products.find((p) => p._id === productToDelete)?.name || "this product"
+                }
+                onClose={() => {
+                    setDeleteProductModalOpen(false);
+                    setProductToDelete(null);
+                }}
+                onConfirm={handleDeleteProduct}
+            />
         </div>
     );
 };

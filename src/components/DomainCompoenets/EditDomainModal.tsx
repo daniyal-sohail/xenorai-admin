@@ -1,7 +1,7 @@
 "use client";
 
-import { FC, useState, useCallback, useEffect } from "react";
-import { X, Save, ChevronRight, ChevronLeft } from "lucide-react";
+import { FC, useState, useCallback, useEffect, useRef } from "react";
+import { X, Save, ChevronRight, ChevronLeft, Upload, Trash2 } from "lucide-react";
 import { IDomain, ToneType, IndustryType } from "./DomainTypes";
 
 interface EditDomainModalProps {
@@ -13,7 +13,7 @@ interface EditDomainModalProps {
 
 export interface UpdateDomainData {
     botName?: string;
-    botAvatar?: string | null;
+    botAvatar?: File | null;
     tone?: ToneType;
     fallbackMessage?: string;
     companyDescription?: string;
@@ -51,17 +51,22 @@ export const EditDomainModal: FC<EditDomainModalProps> = ({
     const [formData, setFormData] = useState<UpdateDomainData>({});
     const [step, setStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (domain) {
             setFormData({
                 botName: domain.botName,
-                botAvatar: domain.botAvatar || "",
+                botAvatar: undefined,
                 tone: domain.tone,
                 fallbackMessage: domain.fallbackMessage,
                 companyDescription: domain.companyDescription || "",
                 industryType: domain.industryType,
             });
+            setExistingAvatarUrl(domain.botAvatar || null);
+            setPreviewUrl(null);
             setStep(0);
         }
     }, [domain]);
@@ -72,12 +77,37 @@ export const EditDomainModal: FC<EditDomainModalProps> = ({
         []
     );
 
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            handleChange("botAvatar", file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+            setExistingAvatarUrl(null); // Clear existing when new file is selected
+        }
+    }, [handleChange]);
+
+    const handleRemoveFile = useCallback(() => {
+        handleChange("botAvatar", null);
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+        setExistingAvatarUrl(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }, [handleChange, previewUrl]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!domain) return;
         setIsSubmitting(true);
         try {
             await onSubmit(domain._id, formData);
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
             onClose();
         } catch {
             // handled by parent
@@ -228,16 +258,53 @@ export const EditDomainModal: FC<EditDomainModalProps> = ({
                             {/* Bot Avatar */}
                             <div>
                                 <label className={labelClass}>
-                                    Bot Avatar URL{" "}
+                                    Bot Avatar{" "}
                                     <span className="text-[#9ca3af] font-normal normal-case tracking-normal">(optional)</span>
                                 </label>
-                                <input
-                                    type="url"
-                                    placeholder="https://example.com/avatar.png"
-                                    value={formData.botAvatar || ""}
-                                    onChange={(e) => handleChange("botAvatar", e.target.value || null)}
-                                    className={inputClass}
-                                />
+
+                                {(previewUrl || existingAvatarUrl) ? (
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
+                                            style={{ border: "2px solid #e5e7eb" }}
+                                        >
+                                            <img
+                                                src={previewUrl || existingAvatarUrl || ""}
+                                                alt="Avatar preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-sm text-[#6b7280]">
+                                            {previewUrl ? formData.botAvatar instanceof File ? formData.botAvatar.name : "New image" : "Current avatar"}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveFile}
+                                            className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                            style={{ color: "#ef4444" }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            id="botAvatarEdit"
+                                        />
+                                        <label
+                                            htmlFor="botAvatarEdit"
+                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-sm text-[#6b7280] hover:border-[#f97518] hover:bg-[#fff5ed] transition-all cursor-pointer"
+                                        >
+                                            <Upload size={16} />
+                                            Choose Image
+                                        </label>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Industry */}
