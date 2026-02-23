@@ -139,17 +139,20 @@ const HeroSection = () => {
 
                 {/* Hero Image - Zooming Effect */}
                 <div
-
                     className='relative w-full '
+                    data-aos="fade-up"
+                    data-aos-delay="300"
                 >
                     {/* Image */}
                     <div
-
                         className='relative w-full '
                     >
                         {/* Image */}
                         <div
                             className='relative z-10 rounded-lg overflow-hidden   transition-all duration-300 mt-18'
+                            data-aos="zoom-in"
+                            data-aos-delay="350"
+                            data-aos-duration="1000"
                         >
                             <img src="/main2.png" alt="hero" className='w-full h-full object-cover' />
                             <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none z-10'></div>

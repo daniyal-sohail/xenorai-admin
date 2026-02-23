@@ -38,9 +38,17 @@ const FAQ = () => {
     };
 
     return (
-        <section id="faq" className="py-10 md:py-20">
-            <div className="max-w-7xl mx-auto px-6 overflow-hidden">
+        <section id="faq" className="py-10 md:py-20 relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+w-[800px] h-[800px] 
+bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 
+rounded-full opacity-10 blur-3xl pointer-events-none z-0 
+hidden lg:block">
+            </div>
+            <div className="max-w-7xl mx-auto px-6 overflow-hidden ">
+
                 <div className="grid relative grid-cols-1 lg:grid-cols-[40%_55%] gap-16 items-start">
+
                     {/* Left Column - Header */}
                     <div>
                         {/* Badge */}
@@ -55,7 +63,9 @@ const FAQ = () => {
     group 
     hover:shadow-md 
     hover:border-orange-300 
-    transition-all duration-300">
+    transition-all duration-300"
+                                data-aos="fade-up"
+                                data-aos-offset="50">
 
                                 <HelpCircle
                                     className="w-5 h-5 text-orange-500 
@@ -72,13 +82,17 @@ const FAQ = () => {
 
 
                             {/* Title */}
-                            <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight">
+                            <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight"
+                                data-aos="fade-up"
+                                data-aos-delay="100">
                                 Frequently Asked Questions
 
                             </h2>
 
                             {/* Subtitle */}
-                            <p className="text-[18px] text-[#1e0d0199] font-[500] leading-relaxed">
+                            <p className="text-[18px] text-[#1e0d0199] font-[500] leading-relaxed"
+                                data-aos="fade-up"
+                                data-aos-delay="150">
                                 Everything you need to know about adding XenorAi to your website quickly and easily.
                             </p>
                         </div>
@@ -87,7 +101,12 @@ const FAQ = () => {
                     </div>
 
                     {/* Decorative Background Shape */}
-                    <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-500 rounded-full opacity-15 blur-3xl pointer-events-none z-0"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+w-[800px] h-[800px] 
+bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 
+rounded-full opacity-10 blur-3xl pointer-events-none z-0 
+block lg:hidden">
+                    </div>
 
                     {/* Right Column - Accordion */}
                     <div className="space-y-4">
@@ -95,6 +114,8 @@ const FAQ = () => {
                             <div
                                 key={index}
                                 className="bg-gray-100 rounded-xl border border-gray-300 overflow-hidden transition-all duration-300"
+                                data-aos="fade-up"
+                                data-aos-delay={`${200 + index * 50}`}
                             >
                                 <button
                                     onClick={() => toggleFAQ(index)}

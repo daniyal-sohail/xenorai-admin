@@ -60,7 +60,9 @@ const About = () => {
     group 
     hover:shadow-md 
     hover:border-orange-300 
-    transition-all duration-300">
+    transition-all duration-300"
+                    data-aos="fade-up"
+                    data-aos-offset="50">
 
                     <Brain
                         className="w-5 h-5 text-orange-500 
@@ -77,7 +79,7 @@ const About = () => {
 
                 {/* Text + First Row Pills */}
                 <div className="relative mb-8">
-                    <div className="max-w-4xl">
+                    <div className="max-w-4xl" data-aos="fade-up" data-aos-delay="100">
                         <h2 className="text-[24px] sm:text-[28px] md:text-[32px] leading-[1.3] font-normal">
                             {words.map((word, index) => (
                                 <span
@@ -120,7 +122,7 @@ const About = () => {
                 <div className="relative">
                     <div className="grid grid-cols-3 gap-4 sm:gap-8 md:gap-12 max-w-3xl">
                         {stats.map((stat, index) => (
-                            <div key={index}>
+                            <div key={index} data-aos="fade-up" data-aos-delay={`${200 + index * 100}`}>
                                 <div className="text-[32px] sm:text-[48px] md:text-[56px] font-bold text-gray-900 leading-none mb-2 sm:mb-3">
                                     {stat.number}
                                 </div>

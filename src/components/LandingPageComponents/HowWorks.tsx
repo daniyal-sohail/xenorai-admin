@@ -38,7 +38,8 @@ const HowWorks = () => {
         <section id="how-it-works" className="py-10 md:py-20">
             <div className="max-w-7xl mx-auto px-6">
                 {/* Header */}
-                <div className="text-center mb-20">
+                <div className="text-center mb-20"
+                    data-aos="fade-up">
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2.5 px-5 py-1.5 
     border border-gray-200 
@@ -49,7 +50,9 @@ const HowWorks = () => {
     group 
     hover:shadow-md 
     hover:border-orange-300 
-    transition-all duration-300">
+    transition-all duration-300"
+                        data-aos="fade-up"
+                        data-aos-offset="50">
 
                         <Workflow
                             className="w-5 h-5 text-orange-500 
@@ -66,10 +69,14 @@ const HowWorks = () => {
 
 
                     {/* Title */}
-                    <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight">
+                    <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight"
+                        data-aos="fade-up"
+                        data-aos-delay="100">
                         Get XenorAi on your site in 3 steps
                     </h2>
 
+                    data-aos="fade-up"
+                    data-aos-delay="150"
                     {/* Subtitle */}
                     <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center ">
 
@@ -100,7 +107,9 @@ const HowWorks = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-20 relative z-10">
                         {steps.map((step, index) => (
-                            <div key={index} className="text-center">
+                            <div key={index} className="text-center"
+                                data-aos="fade-up"
+                                data-aos-delay={`${200 + index * 100}`}>
                                 {/* Icon Circle with Dashed Border */}
                                 <div className="relative inline-flex items-center justify-center mb-4">
                                     {/* Dashed Circle Border */}

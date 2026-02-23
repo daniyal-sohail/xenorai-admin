@@ -75,7 +75,9 @@ export default function PricingCard() {
     group 
     hover:shadow-md 
     hover:border-orange-300 
-    transition-all duration-300">
+    transition-all duration-300"
+                        data-aos="fade-up"
+                        data-aos-offset="50">
 
                         <CreditCard
                             className="w-5 h-5 text-orange-500 
@@ -91,7 +93,9 @@ export default function PricingCard() {
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-[48px] font-[400] tracking-[-3.5px] text-[#1e0d01] mb-4 leading-tight text-center">
+                    <h2 className="text-[48px] font-[400] tracking-[-3.5px] text-[#1e0d01] mb-4 leading-tight text-center"
+                        data-aos="fade-up"
+                        data-aos-delay="100">
                         Simple, Transparent Pricing
                     </h2>
 
@@ -99,7 +103,9 @@ export default function PricingCard() {
                     <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 
     text-[15px] sm:text-[16px] lg:text-[18px] 
     font-[500] leading-relaxed 
-    text-[#1e0d0199] text-center">
+    text-[#1e0d0199] text-center"
+                        data-aos="fade-up"
+                        data-aos-delay="150">
 
                         Choose a plan that fits your stage — whether you're just starting or ready to scale.
                     </p>
@@ -113,6 +119,8 @@ export default function PricingCard() {
                                 ? 'border-1 border-orange-400 shadow-lg'
                                 : 'bg-white border border-gray-200 hover:shadow-lg'
                                 }`}
+                            data-aos="fade-up"
+                            data-aos-delay={`${200 + index * 100}`}
                         >
                             {/* Badge */}
                             {plan.badge && (
@@ -198,6 +206,6 @@ export default function PricingCard() {
                     ))}
                 </div>
             </div>
-        </section>
+        </section >
     );
 }

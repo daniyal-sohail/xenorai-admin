@@ -81,7 +81,9 @@ const Benefits = () => {
     group 
     hover:shadow-md 
     hover:border-orange-300 
-    transition-all duration-300">
+    transition-all duration-300"
+                        data-aos="fade-up"
+                        data-aos-offset="50">
 
                         <BadgeCheck
                             className="w-5 h-5 text-orange-500 
@@ -97,12 +99,16 @@ const Benefits = () => {
                     </div>
 
                     {/* Title */}
-                    < h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight" >
+                    < h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight"
+                        data-aos="fade-up"
+                        data-aos-delay="100" >
                         Build smarter sites, faster
                     </h2 >
 
                     {/* Subtitle */}
-                    < p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center " >
+                    < p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center "
+                        data-aos="fade-up"
+                        data-aos-delay="150" >
 
                         Pre - optimized templates and AI tools that help founders launch bold, client winning sites without the usual grind.
                     </p >
@@ -115,6 +121,8 @@ const Benefits = () => {
                             <div
                                 key={index}
                                 className="group bg-white rounded-2xl p-8 border border-white cursor-pointer  shadow-sm hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                                data-aos="fade-up"
+                                data-aos-delay={`${200 + index * 100}`}
                             >
                                 {/* Icon */}
                                 <div className="w-14 h-14 rounded-xl bg-gray-50 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors duration-300 border border-gray-300">
@@ -139,6 +147,8 @@ const Benefits = () => {
                         <div
                             key={index}
                             className="group bg-white rounded-2xl p-8 border border-white cursor-pointer  shadow-sm hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                            data-aos="fade-up"
+                            data-aos-delay={`${500 + index * 100}`}
                         >
                             {/* Icon */}
                             <div className="w-14 h-14 rounded-xl bg-gray-50 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors duration-300 border border-gray-300">

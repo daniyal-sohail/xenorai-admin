@@ -16,11 +16,14 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto px-6 py-6 md:py-10 ">
 
                 {/* Main Footer Content */}
-                <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 mb-2 max-w-full">
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 mb-2 max-w-full"
+                    data-aos="fade-up">
 
                     {/* Brand Section */}
                     {/* Brand Section */}
-                    <div className="lg:w-[30%]">
+                    <div className="lg:w-[30%]"
+                        data-aos="fade-up"
+                        data-aos-delay="100">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="flex items-center gap-2.5">
                                 <Image
@@ -71,7 +74,9 @@ const Footer = () => {
 
 
                     {/* Company */}
-                    <div className="lg:w-[15%]">
+                    <div className="lg:w-[15%]"
+                        data-aos="fade-up"
+                        data-aos-delay="150">
                         <h3 className="text-lg font-semibold text-gray-900 mb-6">
                             Company
                         </h3>
@@ -96,7 +101,9 @@ const Footer = () => {
                     </div>
 
                     {/* Features (formerly Product) */}
-                    <div className="lg:w-[15%]">
+                    <div className="lg:w-[15%]"
+                        data-aos="fade-up"
+                        data-aos-delay="200">
                         <h3 className="text-lg font-semibold text-gray-900 mb-6">
                             Features
                         </h3>
@@ -120,7 +127,9 @@ const Footer = () => {
                     </div>
 
                     {/* Newsletter / About DevXcript */}
-                    <div className="lg:w-[30%]">
+                    <div className="lg:w-[30%]"
+                        data-aos="fade-up"
+                        data-aos-delay="250">
                         <h3 className="text-lg font-semibold text-gray-900 mb-6">
                             About DevXcript
                         </h3>
@@ -133,7 +142,9 @@ const Footer = () => {
 
 
                 {/* Footer Bottom */}
-                <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden">
+                <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden"
+                    data-aos="fade-up"
+                    data-aos-delay="300">
 
                     <p className="text-gray-500 text-sm text-center md:text-left">
                         © 2026 All rights reserved.

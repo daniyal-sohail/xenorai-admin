@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/LandingPageComponents/SmoothScroll";
 import LoadingScreen from "@/components/LandingPageComponents/LoadingScreen";
+import AOSInit from "@/components/AOSInit";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -95,6 +96,7 @@ export default function RootLayout({
         className={`${inter.variable} antialiased font-sans`}
         style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}
       >
+        <AOSInit />
         <SmoothScroll />
         <LoadingScreen />
         {children}

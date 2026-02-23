@@ -23,9 +23,12 @@ export default function Newsletter() {
     }, [state.succeeded, state.errors]);
 
     return (
-        <section className="w-full py-10 md:py-20">
+        <section className="w-full py-10 md:py-20"
+            data-aos="fade-up">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-orange-500 via-red-500 to-yellow-400 px-6 py-12 text-center sm:px-10">
+                <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-orange-500 via-red-500 to-yellow-400 px-6 py-12 text-center sm:px-10"
+                    data-aos="fade-up"
+                    data-aos-delay="100">
 
                     {/* Soft gradient blobs */}
                     <div className="pointer-events-none absolute -left-24 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-orange-400 opacity-40 blur-3xl" />
@@ -33,7 +36,9 @@ export default function Newsletter() {
 
                     {/* Content */}
                     {/* Content */}
-                    <div className="relative z-10 mx-auto max-w-3xl">
+                    <div className="relative z-10 mx-auto max-w-3xl"
+                        data-aos="fade-up"
+                        data-aos-delay="150">
                         <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
                             Stay Updated with XenorAi
                             <br className="hidden sm:block" />

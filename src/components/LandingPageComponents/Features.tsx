@@ -44,9 +44,17 @@ const Features = () => {
         <section id="features" className="py-10 md:py-20">
             <div className="max-w-7xl mx-auto px-6">
                 {/* Header */}
-                <div className="text-center mb-14">
+                <div className="text-center mb-14 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+w-[800px] h-[800px] 
+bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 
+rounded-full opacity-10 blur-3xl pointer-events-none z-0 
+hidden lg:block">
+                    </div>
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-200 bg-white rounded-full shadow-sm mb-2 group hover:shadow-md transition-all duration-300">
+                    <div className="inline-flex items-center gap-2.5 px-5 py-1.5 border border-gray-200 bg-white rounded-full shadow-sm mb-2 group hover:shadow-md transition-all duration-300"
+                        data-aos="fade-up"
+                        data-aos-offset="50">
 
                         <Sparkles
                             className="w-5 h-5 text-orange-500 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300"
@@ -59,12 +67,16 @@ const Features = () => {
 
 
                     {/* Title */}
-                    <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight">
+                    <h2 className="text-[48px] font-[400] tracking-[-3.5] text-[#1e0d01] mb-4 leading-tight"
+                        data-aos="fade-up"
+                        data-aos-delay="100">
                         Build smarter conversations, faster
                     </h2>
 
                     {/* Subtitle */}
-                    <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center ">
+                    <p className="mx-auto mt-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-0 text-[15px] sm:text-[16px] lg:text-[18px] font-[500] leading-relaxed text-[#1e0d0199] text-center "
+                        data-aos="fade-up"
+                        data-aos-delay="150">
 
                         XenorAi provides ready to deploy AI chatbots that help businesses capture leads, automate sales, and delight customers  without complex setup or coding.
                     </p>
@@ -72,12 +84,19 @@ const Features = () => {
                 {/* Top Row - 2 Large Cards */}
                 <div className="grid relative grid-cols-1 lg:grid-cols-2 gap-6 mb-6 overflow-hidden">
                     {/* Decorative Background Shape */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 rounded-full opacity-10 blur-3xl pointer-events-none z-0"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+w-[800px] h-[800px] 
+bg-gradient-to-br from-pink-300 via-orange-300 to-orange-400 
+rounded-full opacity-10 blur-3xl pointer-events-none z-0 
+block lg:hidden">
+                    </div>
 
                     {mainFeatures.map((feature, index) => (
                         <div
                             key={index}
                             className="bg-gray-50 rounded-3xl p-4 px-6 hover:shadow-sm cursor-pointer transition-all duration-300"
+                            data-aos="fade-up"
+                            data-aos-delay={`${200 + index * 100}`}
                         >
                             {/* Image Preview */}
                             <div className="bg-white rounded-2xl mb-8 shadow-sm">
@@ -116,6 +135,8 @@ const Features = () => {
                         <div
                             key={index}
                             className="bg-gray-50 rounded-3xl p-4 px-6 hover:shadow-sm cursor-pointer transition-all duration-300"
+                            data-aos="fade-up"
+                            data-aos-delay={`${400 + index * 100}`}
                         >
                             {/* Image Preview */}
                             <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
