@@ -143,8 +143,9 @@ const Footer = () => {
 
                 {/* Footer Bottom */}
                 <div className="pt-8 border-t relative border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden"
-                    data-aos="fade-up"
-                    data-aos-delay="300">
+                // data-aos="fade-up"
+                // data-aos-delay="300"
+                >
 
                     <p className="text-gray-500 text-sm text-center md:text-left">
                         © 2026 All rights reserved.
