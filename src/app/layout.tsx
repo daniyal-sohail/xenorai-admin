@@ -14,6 +14,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "XenorAi - AI Sales Chatbot That Converts Visitors Into Revenue",
   description: "AI-powered website chatbot that answers questions instantly, captures leads, automates sales and supports customers 24/7. Turn your website into a revenue machine.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png",
+  },
   keywords: [
     "AI chatbot",
     "AI sales chatbot",
@@ -87,8 +92,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#F97518" />
 
