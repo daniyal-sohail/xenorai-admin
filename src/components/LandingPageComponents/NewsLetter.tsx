@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useForm } from '@formspree/react';
 import { Popup } from '@/components/common/PopUp';
+import { analytics } from '@/lib/analytics';
 
 export default function Newsletter() {
     const [state, handleSubmit] = useForm("mreakbkq");
@@ -16,6 +17,9 @@ export default function Newsletter() {
         if (state.succeeded) {
             setPopupType('success');
             setPopupOpen(true);
+            // Track newsletter subscription
+            analytics.trackNewsletterSignup('newsletter_section');
+            analytics.trackConversion('newsletter_signup');
         } else if (state.errors && Object.keys(state.errors).length > 0) {
             setPopupType('error');
             setPopupOpen(true);

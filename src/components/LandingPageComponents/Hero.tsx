@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react';
 import { useForm } from '@formspree/react';
 import { Popup } from '@/components/common/PopUp';
+import { analytics } from '@/lib/analytics';
 
 const HeroSection = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -22,6 +23,9 @@ const HeroSection = () => {
         if (state.succeeded) {
             setPopupType('success');
             setPopupOpen(true);
+            // Track successful form submission
+            analytics.trackFormSubmit('hero_early_access', 'email_signup');
+            analytics.trackConversion('early_access_signup');
         } else if (state.errors && Object.keys(state.errors).length > 0) {
             setPopupType('error');
             setPopupOpen(true);

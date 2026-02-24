@@ -1,6 +1,9 @@
+'use client';
+
 import { ArrowRight, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import { analytics } from '@/lib/analytics';
 
 export default function PricingCard() {
     const plans = [
@@ -164,6 +167,10 @@ export default function PricingCard() {
                                 <div className="flex w-full justify-center items-center">
                                     <Link
                                         href="mailto:skillhiveclub@ucp.edu.pk"
+                                        onClick={() => {
+                                            analytics.trackPlanInterest(plan.name, plan.price);
+                                            analytics.trackButtonClick(`${plan.name}_plan_cta`, 'pricing_section');
+                                        }}
                                         className={`group  ${plan.buttonStyle}  h-10 rounded-full py-5 px-2 cursor-pointer shadow-lg flex justify-center items-center  hover:shadow-xl w-full transition-all duration-300 no-underline`}
                                     >
                                         <span className="mr-2">{plan.buttonText}</span>
