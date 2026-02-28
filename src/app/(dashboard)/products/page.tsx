@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Plus, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
 import { useProductStore } from "@/store/product.store";
 import { useDomainStore } from "@/store/domain.store";
 import { IProduct } from "@/api/ProductApi";
@@ -14,7 +16,10 @@ import { EditProductModal } from "@/components/productComponents/EditProductModa
 import { DeleteConfirmModal } from "@/components/DomainCompoenets/DomainConfirmModal";
 import { ProductTable } from "@/components/productComponents/ProductTable";
 
-export default function ProductsPage() {
+function ProductsPageContent() {
+    const router = useRouter();
+    const { isAuthenticated, user, clearAuth } = useAuthStore();
+    const isAdmin = String(user?.role || "").toLowerCase() === "admin";
     const {
         products,
         loading,
@@ -47,6 +52,25 @@ export default function ProductsPage() {
 
     const { filters, filteredProducts, handleFilterChange } =
         useProductFilters(products);
+
+    // Verify auth and listen for expiration
+    useEffect(() => {
+        if (!isAuthenticated || !user || !isAdmin) {
+            console.log("🔒 Auth lost in products page");
+            clearAuth();
+            router.replace("/sign-in?session=expired");
+            return;
+        }
+
+        const handleAuthExpired = () => {
+            console.log("🔒 Session expired in products page");
+            clearAuth();
+            router.replace("/sign-in?session=expired");
+        };
+
+        window.addEventListener("auth-expired", handleAuthExpired);
+        return () => window.removeEventListener("auth-expired", handleAuthExpired);
+    }, [isAuthenticated, user, isAdmin, router, clearAuth]);
 
     useEffect(() => {
         fetchDomains();
@@ -167,19 +191,7 @@ export default function ProductsPage() {
                             )}
                         </div>
                     </div>
-                    <button
-                        onClick={() => setCreateModalOpen(true)}
-                        disabled={!selectedDomainId || !canCreateProduct}
-                        className="btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-orange-200/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                        title={
-                            !canCreateProduct
-                                ? "Free plan limited to 3 active products"
-                                : ""
-                        }
-                    >
-                        <Plus size={15} />
-                        New Product
-                    </button>
+
                 </div>
                 {!canCreateProduct && selectedDomainId && (
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
@@ -254,4 +266,16 @@ export default function ProductsPage() {
             />
         </div>
     );
+}
+
+export default function ProductsPage() {
+    const { isAuthenticated, user } = useAuthStore();
+    const isAdmin = String(user?.role || "").toLowerCase() === "admin";
+
+    // Don't render content until auth is confirmed
+    if (!isAuthenticated || !user || !isAdmin) {
+        return null;
+    }
+
+    return <ProductsPageContent />;
 }

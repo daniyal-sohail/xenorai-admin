@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDomainStore } from "@/store/domain.store";
-import { IDomain } from "@/api/DomainApi";
 import { DomainDetail } from "@/components/DomainCompoenets/DomainDetail";
 import { Popup, PopupType } from "@/components/common/PopUp";
 import { EditDomainModal, UpdateDomainData } from "@/components/DomainCompoenets/EditDomainModal";
@@ -15,25 +14,20 @@ export default function DomainDetailPage() {
     const domainId = params.domainId as string;
 
     const {
-        domains,
-        loading,
-        error,
-        fetchDomains,
+        activeDomain,
+        botScript,
         fetchDomainById,
         updateDomain,
         deleteDomain,
         toggleBotStatus,
-        botScript,
+        clearActiveDomain,
     } = useDomainStore();
 
-    const [selectedDomain, setSelectedDomain] = useState<IDomain | null>(null);
+    const [pageLoading, setPageLoading] = useState(true);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
     const [toast, setToast] = useState<{ open: boolean; type: PopupType; message: string }>({
-        open: false,
-        type: "info",
-        message: "",
+        open: false, type: "info", message: "",
     });
 
     const showToast = useCallback(
@@ -41,74 +35,75 @@ export default function DomainDetailPage() {
         []
     );
 
-    // Fetch domain on mount
     useEffect(() => {
-        const loadDomain = async () => {
+        const load = async () => {
+            setPageLoading(true);
             try {
                 await fetchDomainById(domainId);
             } catch (err) {
                 showToast("error", "Failed to load domain");
                 router.push("/domains");
+            } finally {
+                setPageLoading(false);
             }
         };
-        loadDomain();
-    }, [domainId, fetchDomainById, showToast, router]);
 
-    // Set selected domain when fetched
-    useEffect(() => {
-        const domain = domains.find((d) => d._id === domainId);
-        if (domain) {
-            setSelectedDomain(domain);
+        load();
+
+        return () => { clearActiveDomain(); };
+    }, [domainId]);
+
+    const handleEdit = useCallback(async (id: string, data: UpdateDomainData) => {
+        try {
+            await updateDomain(id, data);
+            showToast("success", "Domain updated!");
+            setEditModalOpen(false);
+        } catch (err) {
+            showToast("error", err instanceof Error ? err.message : "Update failed");
         }
-    }, [domains, domainId]);
-
-    // Show error toast
-    useEffect(() => {
-        if (error) showToast("error", error);
-    }, [error, showToast]);
-
-    const handleEdit = useCallback(
-        async (id: string, data: UpdateDomainData) => {
-            try {
-                await updateDomain(id, data);
-                showToast("success", "Domain updated!");
-                setEditModalOpen(false);
-            } catch (err) {
-                showToast("error", err instanceof Error ? err.message : "Update failed");
-            }
-        },
-        [updateDomain, showToast]
-    );
+    }, [updateDomain, showToast]);
 
     const handleDelete = useCallback(async () => {
         try {
             await deleteDomain(domainId);
-            showToast("success", "Domain deleted successfully");
+            showToast("success", "Domain deleted");
             router.push("/domains");
         } catch (err) {
             showToast("error", err instanceof Error ? err.message : "Delete failed");
         }
     }, [domainId, deleteDomain, showToast, router]);
 
-    const handleToggle = useCallback(
-        async (id: string) => {
-            try {
-                await toggleBotStatus(id);
-                const domain = domains.find((d) => d._id === id);
-                showToast("success", `Bot ${!domain?.botEnabled ? "enabled" : "disabled"}`);
-            } catch (err) {
-                showToast("error", err instanceof Error ? err.message : "Toggle failed");
-            }
-        },
-        [toggleBotStatus, domains, showToast]
-    );
+    const handleToggle = useCallback(async (id: string) => {
+        try {
+            await toggleBotStatus(id);
+            showToast("success", `Bot ${activeDomain?.botEnabled ? "disabled" : "enabled"}`);
+        } catch (err) {
+            showToast("error", err instanceof Error ? err.message : "Toggle failed");
+        }
+    }, [toggleBotStatus, activeDomain, showToast]);
 
-    if (loading || !selectedDomain) {
+    if (pageLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97518]"></div>
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97518]" />
                     <p className="mt-4 text-gray-600">Loading domain details…</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!activeDomain) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <p className="text-gray-600 mb-4">Domain not found.</p>
+                    <button
+                        onClick={() => router.push("/domains")}
+                        className="px-4 py-2 bg-[#f97518] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition"
+                    >
+                        Back to Domains
+                    </button>
                 </div>
             </div>
         );
@@ -117,40 +112,33 @@ export default function DomainDetailPage() {
     return (
         <>
             <DomainDetail
-                domain={selectedDomain}
-                script={botScript}
+                domain={activeDomain}
+                script={botScript}          // ← ye ab guaranteed set hai activeDomain ke saath
                 onBack={() => router.push("/domains")}
-                onEdit={(domain) => {
-                    setSelectedDomain(domain);
-                    setEditModalOpen(true);
-                }}
-                onDelete={(id) => setDeleteModalOpen(true)}
+                onEdit={() => setEditModalOpen(true)}
+                onDelete={() => setDeleteModalOpen(true)}
                 onToggle={handleToggle}
             />
 
-            {selectedDomain && (
-                <>
-                    <EditDomainModal
-                        isOpen={editModalOpen}
-                        domain={selectedDomain}
-                        onClose={() => setEditModalOpen(false)}
-                        onSubmit={handleEdit}
-                    />
+            <EditDomainModal
+                isOpen={editModalOpen}
+                domain={activeDomain}
+                onClose={() => setEditModalOpen(false)}
+                onSubmit={handleEdit}
+            />
 
-                    <DeleteConfirmModal
-                        isOpen={deleteModalOpen}
-                        domainName={selectedDomain.domainName}
-                        onClose={() => setDeleteModalOpen(false)}
-                        onConfirm={handleDelete}
-                    />
-                </>
-            )}
+            <DeleteConfirmModal
+                isOpen={deleteModalOpen}
+                domainName={activeDomain.domainName}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+            />
 
             <Popup
                 open={toast.open}
                 type={toast.type}
                 message={toast.message}
-                onClose={() => setToast({ ...toast, open: false })}
+                onClose={() => setToast(t => ({ ...t, open: false }))}
             />
         </>
     );

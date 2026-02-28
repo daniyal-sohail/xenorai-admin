@@ -22,30 +22,51 @@ API.interceptors.request.use(
 // Response interceptor
 API.interceptors.response.use(
     (response: AxiosResponse) => response,
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
         const status = error.response?.status;
 
-        // Handle authentication errors
+        // Handle authentication errors (401 Unauthorized, 403 Forbidden)
         if (status === 401 || status === 403) {
-            console.error("🔒 Authentication failed - Token expired or invalid");
+            console.error("🔒 Session Expired - Clearing auth and redirecting");
 
-            // Clear auth via Zustand store
+            // Clear auth immediately and synchronously
             try {
                 const { useAuthStore } = require("../store/auth.store");
-                useAuthStore.getState().clearAuth();
+                const authStore = useAuthStore.getState();
+                authStore.clearAuth();
             } catch (e) {
                 console.error("Failed to clear auth store:", e);
             }
 
-            // Only redirect if we're not already on an auth page
-            if (typeof window !== 'undefined' &&
-                !window.location.pathname.includes('/sign-in') &&
-                !window.location.pathname.includes('/sign-up')) {
-                window.location.href = '/sign-in';
+            // Clear all storage
+            if (typeof window !== 'undefined') {
+                try {
+                    localStorage.removeItem('auth-storage');
+                    sessionStorage.clear();
+                } catch (e) {
+                    console.error("Failed to clear storage:", e);
+                }
+
+                // Check if we're on an auth page
+                const isAuthPage = window.location.pathname.includes('/sign-in') ||
+                    window.location.pathname.includes('/sign-up') ||
+                    window.location.pathname.includes('/forgot-password');
+
+                // If not on auth page, redirect
+                if (!isAuthPage) {
+                    // Dispatch event first for immediate listener response
+                    const event = new CustomEvent('auth-expired', { detail: { status } });
+                    window.dispatchEvent(event);
+
+                    // Then redirect - use setTimeout to ensure event is processed
+                    setTimeout(() => {
+                        window.location.href = '/sign-in?session=expired';
+                    }, 0);
+                }
             }
         }
 
-        console.error("API Error:", error.response?.data || error.message);
+        // Always reject the error to stop component execution
         return Promise.reject(error);
     }
 );

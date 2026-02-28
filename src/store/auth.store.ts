@@ -37,6 +37,11 @@ interface AuthState {
     }) => Promise<void>;
 }
 
+const isAdminUser = (user: IUser | null | undefined): boolean =>
+    String(user?.role || "").toLowerCase() === "admin";
+
+const ADMIN_ONLY_ERROR = "Access denied. Only admin accounts can sign in.";
+
 export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
@@ -47,7 +52,10 @@ export const useAuthStore = create<AuthState>()(
             error: null,
             isAuthenticated: false,
 
-            setUser: (user) => set({ user, isAuthenticated: !!user }),
+            setUser: (user) => {
+                const isAdmin = isAdminUser(user);
+                set({ user: isAdmin ? user : null, isAuthenticated: isAdmin });
+            },
             clearAuth: () =>
                 set({
                     user: null,
@@ -81,6 +89,14 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: null });
                     const data: IAuthResponse = await AuthApi.login(email, password);
+
+                    if (!isAdminUser(data.user)) {
+                        await AuthApi.logout().catch(() => false);
+                        get().clearAuth();
+                        set({ error: ADMIN_ONLY_ERROR });
+                        throw new Error(ADMIN_ONLY_ERROR);
+                    }
+
                     set({
                         user: data.user,
                         accessToken: data.accessToken,
@@ -101,6 +117,14 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: null });
                     const data: IAuthResponse = await AuthApi.googleLogin(code);
+
+                    if (!isAdminUser(data.user)) {
+                        await AuthApi.logout().catch(() => false);
+                        get().clearAuth();
+                        set({ error: ADMIN_ONLY_ERROR });
+                        throw new Error(ADMIN_ONLY_ERROR);
+                    }
+
                     set({
                         user: data.user,
                         accessToken: data.accessToken,
@@ -170,7 +194,10 @@ export const useAuthStore = create<AuthState>()(
             onRehydrateStorage: () => (state) => {
                 // After rehydration, ensure isAuthenticated matches user state
                 if (state) {
-                    state.isAuthenticated = !!state.user;
+                    if (state.user && !isAdminUser(state.user)) {
+                        state.user = null;
+                    }
+                    state.isAuthenticated = isAdminUser(state.user);
                 }
             },
         }

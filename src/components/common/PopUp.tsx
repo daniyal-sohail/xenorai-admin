@@ -4,7 +4,7 @@ import { FC, ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-export type PopupType = "success" | "error" | "info";
+export type PopupType = "success" | "error" | "info" | "warning";
 
 interface PopupProps {
     open: boolean;
@@ -19,6 +19,7 @@ const typeColors: Record<PopupType, { bg: string; text: string }> = {
     success: { bg: "bg-green-50", text: "text-green-700" },
     error: { bg: "bg-red-50", text: "text-red-700" },
     info: { bg: "bg-blue-50", text: "text-blue-700" },
+    warning: { bg: "bg-yellow-50", text: "text-yellow-800" },
 };
 
 export const Popup: FC<PopupProps> = ({
@@ -43,12 +44,12 @@ export const Popup: FC<PopupProps> = ({
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-start sm:justify-end p-4 pointer-events-none">
             <div
-                className={`pointer-events-auto w-full sm:max-w-sm rounded-lg shadow-lg border border-gray-200 ${typeColors[type].bg} overflow-hidden animate-slide-in`}
+                className={`pointer-events-auto w-full sm:max-w-sm rounded-lg shadow-lg border border-gray-200 ${(typeColors[type]?.bg || typeColors.info.bg)} overflow-hidden animate-slide-in`}
             >
                 {/* Header */}
                 <div className="flex items-start justify-between p-4">
                     <div>
-                        {title && <h3 className={`text-sm font-semibold ${typeColors[type].text}`}>{title}</h3>}
+                        {title && <h3 className={`text-sm font-semibold ${(typeColors[type]?.text || typeColors.info.text)}`}>{title}</h3>}
                         <p className="mt-1 text-sm text-gray-700">{message}</p>
                     </div>
                     <button

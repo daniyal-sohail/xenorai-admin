@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import SmoothScroll from "@/components/LandingPageComponents/SmoothScroll";
-import LoadingScreen from "@/components/LandingPageComponents/LoadingScreen";
 import AOSInit from "@/components/AOSInit";
 
 const inter = Inter({
@@ -115,8 +113,6 @@ export default function RootLayout({
         style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}
       >
         <AOSInit />
-        <SmoothScroll />
-        <LoadingScreen />
         {children}
 
         {/* Structured Data for SEO */}

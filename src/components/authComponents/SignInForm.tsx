@@ -48,6 +48,7 @@ const FloatingInput = ({ label, error, id, ...props }: FloatingInputProps) => {
                 onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
                 onBlur={(e) => { setFocused(false); props.onBlur?.(e); }}
                 placeholder=" "
+                suppressHydrationWarning
                 style={{
                     width: "100%",
                     background: focused ? "rgb(var(--surface-hover, 250 250 250))" : "rgb(var(--surface, 245 245 245))",
@@ -155,6 +156,16 @@ function SignInForm() {
 
     useEffect(() => {
         setTimeout(() => setMounted(true), 40);
+
+        // Check if session expired
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('session') === 'expired') {
+            setPopup({
+                open: true,
+                type: "warning",
+                message: "Your session has expired. Please sign in again.",
+            });
+        }
     }, []);
 
     // Initialize Google Sign-In
@@ -300,6 +311,7 @@ function SignInForm() {
                     {/* Google Button */}
                     <button
                         type="button"
+                        suppressHydrationWarning
                         onClick={() => {
                             const googleBtn = document.querySelector<HTMLElement>("#googleSignInDiv [role='button']");
                             googleBtn?.click();
@@ -431,6 +443,7 @@ function SignInForm() {
                         <button
                             type="submit"
                             disabled={loading}
+                            suppressHydrationWarning
                             style={{
                                 width: "100%",
                                 padding: "12px 16px",
