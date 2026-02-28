@@ -1,12 +1,12 @@
 "use client";
 
-import Dashboard from "@/components/dashboardComponents/Dashboard";
+import AdminChatPage from "@/components/chatComponents/AdminChat";
 import React from "react";
 
 export default function DashboardPage() {
     return (
         <div className="space-y-6">
-            <Dashboard />
+            <AdminChatPage />
         </div>
     );
 }
