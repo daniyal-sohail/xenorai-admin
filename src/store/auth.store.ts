@@ -17,6 +17,7 @@ interface AuthState {
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
+    isHydrated: boolean;
 
     // Actions
     setUser: (user: IUser) => void;
@@ -51,6 +52,7 @@ export const useAuthStore = create<AuthState>()(
             loading: false,
             error: null,
             isAuthenticated: false,
+            isHydrated: false,
 
             setUser: (user) => {
                 const isAdmin = isAdminUser(user);
@@ -62,6 +64,7 @@ export const useAuthStore = create<AuthState>()(
                     accessToken: null,
                     refreshToken: null,
                     isAuthenticated: false,
+                    isHydrated: true,
                     error: null,
                 }),
 
@@ -190,14 +193,19 @@ export const useAuthStore = create<AuthState>()(
             name: "auth-storage",
             partialize: (state) => ({
                 user: state.user,
+                accessToken: state.accessToken,
+                refreshToken: state.refreshToken,
             }),
             onRehydrateStorage: () => (state) => {
                 // After rehydration, ensure isAuthenticated matches user state
                 if (state) {
                     if (state.user && !isAdminUser(state.user)) {
                         state.user = null;
+                        state.accessToken = null;
+                        state.refreshToken = null;
                     }
                     state.isAuthenticated = isAdminUser(state.user);
+                    state.isHydrated = true;
                 }
             },
         }

@@ -24,6 +24,7 @@ export interface IAdminChat {
 
 export interface IChatMessage {
     _id: string;
+    adminChatId: string;
     sender: string;
     content: string;
     createdAt: string;

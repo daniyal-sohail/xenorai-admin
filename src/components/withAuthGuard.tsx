@@ -11,17 +11,22 @@ export function withAuthGuard<P extends object>(
 ): React.FC<P> {
     return function AuthGuardedComponent(props: P) {
         const router = useRouter();
-        const { isAuthenticated, user, clearAuth } = useAuthStore();
+        const { isAuthenticated, user, clearAuth, isHydrated } = useAuthStore();
         const isAdmin = String(user?.role || "").toLowerCase() === "admin";
 
         useEffect(() => {
+            // Wait for store to hydrate from localStorage before checking auth
+            if (!isHydrated) {
+                return;
+            }
+
             // If auth becomes invalid during page rendering, redirect immediately
             if (!isAuthenticated || !user || !isAdmin) {
                 console.log("🔒 Auth lost during page load, redirecting");
                 clearAuth();
                 router.replace("/sign-in?session=expired");
             }
-        }, [isAuthenticated, user, isAdmin, router, clearAuth]);
+        }, [isAuthenticated, user, isAdmin, router, clearAuth, isHydrated]);
 
         // Listen for auth expiration
         useEffect(() => {
@@ -34,8 +39,8 @@ export function withAuthGuard<P extends object>(
             return () => window.removeEventListener("auth-expired", handleAuthExpired);
         }, [router]);
 
-        // Don't render until we confirm auth is still valid
-        if (!isAuthenticated || !user || !isAdmin) {
+        // Don't render until we confirm auth is still valid and store is hydrated
+        if (!isHydrated || !isAuthenticated || !user || !isAdmin) {
             return null;
         }
 

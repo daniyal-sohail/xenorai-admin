@@ -10,31 +10,28 @@ import { useAuthStore } from "@/store/auth.store";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const { sidebarOpen, setSidebarOpen } = useUIStore();
-    const { isAuthenticated, user, clearAuth } = useAuthStore();
+    const { isAuthenticated, user, clearAuth, isHydrated } = useAuthStore();
     const isAdmin = String(user?.role || "").toLowerCase() === "admin";
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
-        // Check if user is authenticated - redirect immediately if not
-        const checkAuth = async () => {
-            // Give store time to hydrate from localStorage
-            await new Promise(resolve => setTimeout(resolve, 50));
+        // Wait for Zustand persist hydration before auth checks
+        if (!isHydrated) {
+            return;
+        }
 
-            // If not authenticated, clear and redirect immediately
-            if (!isAuthenticated || !user || !isAdmin) {
-                console.log("🔒 Not authenticated, redirecting to sign-in");
-                clearAuth();
-                router.replace("/sign-in");
-                return;
-            }
+        // If not authenticated after hydration, redirect
+        if (!isAuthenticated || !user || !isAdmin) {
+            console.log("🔒 Not authenticated, redirecting to sign-in");
+            clearAuth();
+            router.replace("/sign-in");
+            return;
+        }
 
-            // Auth is valid, mark as ready to render
-            console.log("✅ User authenticated, rendering dashboard");
-            setIsReady(true);
-        };
-
-        checkAuth();
-    }, [isAuthenticated, user, isAdmin, router, clearAuth]);
+        // Auth is valid, render dashboard
+        console.log("✅ User authenticated, rendering dashboard");
+        setIsReady(true);
+    }, [isAuthenticated, user, isAdmin, router, clearAuth, isHydrated]);
 
     // Listen for session expiration from API interceptor
     useEffect(() => {
@@ -48,8 +45,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return () => window.removeEventListener("auth-expired", handleAuthExpired);
     }, [router, clearAuth]);
 
-    // Don't render anything until auth is verified
-    if (!isReady) {
+    // Don't render anything until store is hydrated and auth is verified
+    if (!isHydrated || !isReady) {
         return null;
     }
 

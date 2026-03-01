@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, Send, MessageSquare, X, ChevronDown } from "lucide-react";
 import { useAdminChatStore } from "@/store/useAdminChatStore";
+import { useAdminSocket } from "@/hooks/useAdminSocket";
+import { useAuthStore } from "@/store/auth.store";
+import { IChatMessage } from "@/api/AdminChatApi";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatTime(iso: string) {
@@ -79,8 +82,20 @@ const Bubble = ({ content, time, isAdmin }: BubbleProps) => (
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AdminChatPage() {
-    const { chats, messagesByChat, selectedChatId, loading, fetchChats, selectChat, sendMessage } =
-        useAdminChatStore();
+    const {
+        chats,
+        messagesByChat,
+        selectedChatId,
+        selectedUserId,
+        loading,
+        fetchChats,
+        selectChat,
+        sendMessage,
+        addMessageToChat,
+        setMessagesForChat
+    } = useAdminChatStore();
+
+    const { accessToken } = useAuthStore();
 
     const [search, setSearch] = useState("");
     const [input, setInput] = useState("");
@@ -89,7 +104,54 @@ export default function AdminChatPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+    // Use refs to avoid closure issues with socket callbacks
+    const selectedChatIdRef = useRef(selectedChatId);
+    const addMessageToChatRef = useRef(addMessageToChat);
+    const setMessagesForChatRef = useRef(setMessagesForChat);
+
+    // Keep refs in sync with current values
+    useEffect(() => {
+        selectedChatIdRef.current = selectedChatId;
+    }, [selectedChatId]);
+
+    useEffect(() => {
+        addMessageToChatRef.current = addMessageToChat;
+        setMessagesForChatRef.current = setMessagesForChat;
+    }, [addMessageToChat, setMessagesForChat]);
+
+    // Initialize socket connection
+    const { sendMessage: socketSendMessage, joinChat, isConnected } = useAdminSocket({
+        token: accessToken || "",
+        userId: selectedUserId,
+        onChatHistory: (data) => {
+            console.log("Admin received chat history", data);
+            const currentChatId = selectedChatIdRef.current;
+            if (currentChatId) {
+                setMessagesForChatRef.current(currentChatId, data.messages);
+            }
+        },
+        onNewMessage: (message: IChatMessage) => {
+            console.log("Admin received new message", message);
+            // Use the adminChatId from the message to ensure correct routing
+            const chatId = message.adminChatId || selectedChatIdRef.current;
+            if (chatId) {
+                addMessageToChatRef.current(chatId, message);
+            }
+        },
+        onError: (error) => {
+            console.error("Socket error:", error);
+        },
+    });
+
     useEffect(() => { fetchChats(); }, [fetchChats]);
+
+    // Join the selected user's chat room when selection changes
+    useEffect(() => {
+        if (selectedUserId && isConnected) {
+            console.log("Admin joining chat for user:", selectedUserId);
+            joinChat(selectedUserId);
+        }
+    }, [selectedUserId, isConnected, joinChat]);
 
     // auto-scroll to bottom when messages update
     useEffect(() => {
@@ -110,11 +172,21 @@ export default function AdminChatPage() {
     };
 
     const handleSend = async () => {
-        if (!input.trim() || !selectedChatId || sending) return;
+        if (!input.trim() || !selectedChatId || !selectedUserId || sending) return;
         setSending(true);
         const content = input.trim();
         setInput("");
-        try { await sendMessage(content); } finally { setSending(false); }
+        try {
+            // Use socket for real-time messaging
+            if (isConnected) {
+                socketSendMessage(selectedUserId, content);
+            } else {
+                // Fallback to API if socket not connected
+                await sendMessage(content, false);
+            }
+        } finally {
+            setSending(false);
+        }
     };
 
     const filteredChats = chats.filter((c) => {

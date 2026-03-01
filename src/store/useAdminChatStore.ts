@@ -5,18 +5,23 @@ interface AdminChatState {
     chats: IAdminChat[];
     messagesByChat: Record<string, IChatMessage[]>;
     selectedChatId: string | null;
+    selectedUserId: string | null;
     loading: boolean;
     error: string | null;
 
     fetchChats: () => Promise<void>;
     selectChat: (chatId: string) => Promise<void>;
-    sendMessage: (content: string) => Promise<void>;
+    sendMessage: (content: string, useSocket?: boolean) => Promise<void>;
+    addMessageToChat: (chatId: string, message: IChatMessage) => void;
+    setMessagesForChat: (chatId: string, messages: IChatMessage[]) => void;
+    setSelectedUserId: (userId: string | null) => void;
 }
 
 export const useAdminChatStore = create<AdminChatState>((set, get) => ({
     chats: [],
     messagesByChat: {},
     selectedChatId: null,
+    selectedUserId: null,
     loading: false,
     error: null,
 
@@ -35,6 +40,12 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
     selectChat: async (chatId) => {
         set({ selectedChatId: chatId });
 
+        // Find the userId for this chat
+        const chat = get().chats.find(c => c._id === chatId);
+        if (chat?.user?._id) {
+            set({ selectedUserId: chat.user._id });
+        }
+
         if (get().messagesByChat[chatId]) return; // 🚀 prevent refetch
 
         try {
@@ -51,20 +62,48 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
         }
     },
 
-    sendMessage: async (content) => {
+    sendMessage: async (content, useSocket = false) => {
         const { selectedChatId } = get();
         if (!selectedChatId) return;
 
-        const message = await AdminChatApi.sendMessage(selectedChatId, content);
+        // If not using socket, fall back to API (for backwards compatibility)
+        if (!useSocket) {
+            const message = await AdminChatApi.sendMessage(selectedChatId, content);
+            set((state) => ({
+                messagesByChat: {
+                    ...state.messagesByChat,
+                    [selectedChatId]: [
+                        ...(state.messagesByChat[selectedChatId] || []),
+                        message,
+                    ],
+                },
+            }));
+        }
+        // When using socket, the message will be added via socket event listener
+    },
 
+    addMessageToChat: (chatId, message) => {
         set((state) => ({
             messagesByChat: {
                 ...state.messagesByChat,
-                [selectedChatId]: [
-                    ...(state.messagesByChat[selectedChatId] || []),
+                [chatId]: [
+                    ...(state.messagesByChat[chatId] || []),
                     message,
                 ],
             },
         }));
+    },
+
+    setMessagesForChat: (chatId, messages) => {
+        set((state) => ({
+            messagesByChat: {
+                ...state.messagesByChat,
+                [chatId]: messages,
+            },
+        }));
+    },
+
+    setSelectedUserId: (userId) => {
+        set({ selectedUserId: userId });
     },
 }));
